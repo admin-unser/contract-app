@@ -2,6 +2,8 @@
 
 Next.js + Supabase で動く電子契約の MVP です。文書アップロード・署名者指定・電子署名・完了・ダウンロードまで一通り利用できます。
 
+**本番**: [https://contract-app-rosy.vercel.app/](https://contract-app-rosy.vercel.app/)
+
 ## 機能
 
 - **認証**: メール/パスワードでサインアップ・ログイン（Supabase Auth）
@@ -77,9 +79,9 @@ npm run dev
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - （任意）`NEXT_PUBLIC_APP_URL` … デプロイ後の URL（例: `https://xxx.vercel.app`）。ログアウト後のリダイレクト先に使います。
+   - （任意）`NEXT_PUBLIC_APP_URL` … 本番の URL（例: `https://contract-app-rosy.vercel.app`）。ログアウト後のリダイレクト先に使います。
 
-4. デプロイ後、Supabase の **Authentication → URL Configuration** で **Site URL** に Vercel の URL を設定し、**Redirect URLs** に `https://あなたのドメイン/**` を追加してください。
+4. デプロイ後、Supabase の **Authentication → URL Configuration** で **Site URL** に `https://contract-app-rosy.vercel.app` を設定し、**Redirect URLs** に `https://contract-app-rosy.vercel.app/**` を追加してください。
 
 **「No Output Directory named "public" found」が出る場合**: Vercel の **Project Settings → General** で **Framework Preset** を **Next.js** にし、**Output Directory** を空（未指定）にしてください。
 
