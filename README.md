@@ -81,6 +81,8 @@ npm run dev
 
 4. デプロイ後、Supabase の **Authentication → URL Configuration** で **Site URL** に Vercel の URL を設定し、**Redirect URLs** に `https://あなたのドメイン/**` を追加してください。
 
+**「No Output Directory named "public" found」が出る場合**: Vercel の **Project Settings → General** で **Framework Preset** を **Next.js** にし、**Output Directory** を空（未指定）にしてください。
+
 ## 技術スタック
 
 - Next.js 14（App Router）、TypeScript、Tailwind CSS
