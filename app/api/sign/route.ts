@@ -6,11 +6,12 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { documentId, signerId, signature, token } = body as {
+  const { documentId, signerId, signature, token, fieldValues } = body as {
     documentId: string;
     signerId?: string;
     token?: string;
     signature: { type: string; text?: string; dataUrl?: string };
+    fieldValues?: Record<string, string>; // field_id -> value
   };
   if (!documentId || !signature) {
     return NextResponse.json(
@@ -67,6 +68,17 @@ export async function POST(request: Request) {
       { error: updateError.message ?? "署名の保存に失敗しました。" },
       { status: 500 }
     );
+  }
+
+  // Save per-field values
+  if (fieldValues && Object.keys(fieldValues).length > 0) {
+    for (const [fieldId, value] of Object.entries(fieldValues)) {
+      await supabase
+        .from("signature_fields")
+        .update({ field_value: value })
+        .eq("id", fieldId)
+        .eq("signer_id", signer.id);
+    }
   }
 
   // Record audit log for signature

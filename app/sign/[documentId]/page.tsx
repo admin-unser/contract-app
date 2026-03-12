@@ -58,7 +58,7 @@ export default async function SignPage({
   // Get signature fields for this signer
   const { data: fields } = await supabase
     .from("signature_fields")
-    .select("id, page, x, y, width, height, signer_id")
+    .select("id, page, x, y, width, height, signer_id, field_type, label, field_value")
     .eq("document_id", documentId)
     .eq("signer_id", resolvedSignerId)
     .order("page", { ascending: true });
@@ -82,6 +82,7 @@ export default async function SignPage({
               pdfUrl={pdfUrl}
               fields={(fields as SignatureField[]) ?? []}
               signerName={signer.name || signer.email.split("@")[0]}
+              companyName={signer.company_name || undefined}
               otpVerified={!!signer.otp_verified}
             />
           </div>

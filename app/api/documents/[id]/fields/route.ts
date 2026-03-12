@@ -46,7 +46,7 @@ export async function PUT(
   if (!doc) return NextResponse.json({ error: "文書が見つかりません。" }, { status: 404 });
 
   const { fields } = await request.json() as {
-    fields: { signer_id: string; page: number; x: number; y: number; width: number; height: number }[];
+    fields: { signer_id: string; page: number; x: number; y: number; width: number; height: number; field_type?: string; label?: string }[];
   };
 
   // 既存フィールドを削除
@@ -63,6 +63,8 @@ export async function PUT(
         y: f.y,
         width: f.width,
         height: f.height,
+        field_type: f.field_type || "signature",
+        label: f.label || null,
       }))
     );
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -9,7 +9,8 @@ import "react-pdf/dist/Page/TextLayer.css";
 import { Stepper } from "@/components/Stepper";
 import { TemplateSelector } from "@/components/TemplateSelector";
 import type { SignerRow } from "@/components/SignerInput";
-import type { TemplateWithFolder, EmailTemplate, EnvelopeSigner, SignatureField } from "@/lib/types";
+import type { TemplateWithFolder, EmailTemplate, EnvelopeSigner, SignatureField, FieldType } from "@/lib/types";
+import { FIELD_TYPE_CONFIG } from "@/lib/types";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -32,6 +33,7 @@ const SIGNER_COLORS = [
 interface FieldDraft {
   id: string;
   signer_id: string;
+  field_type: FieldType;
   page: number;
   x: number;
   y: number;
@@ -42,10 +44,10 @@ interface FieldDraft {
 type InteractionMode = "idle" | "dragging" | "resizing";
 type ResizeHandle = "se" | "sw" | "ne" | "nw" | "e" | "w" | "s" | "n";
 
-const DEFAULT_FIELD_WIDTH = 20;
-const DEFAULT_FIELD_HEIGHT = 5;
-const MIN_FIELD_WIDTH = 8;
-const MIN_FIELD_HEIGHT = 3;
+const MIN_FIELD_WIDTH = 3;
+const MIN_FIELD_HEIGHT = 2;
+
+const FIELD_TYPE_ORDER: FieldType[] = ["signature", "name", "company", "address", "date", "stamp", "text", "checkbox"];
 
 function NewDocumentWizard() {
   const router = useRouter();
@@ -78,6 +80,7 @@ function NewDocumentWizard() {
   const [fieldTotalPages, setFieldTotalPages] = useState(1);
   const [selectedSigner, setSelectedSigner] = useState<string | null>(null);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [selectedFieldType, setSelectedFieldType] = useState<FieldType>("signature");
   const fieldContainerRef = useRef<HTMLDivElement>(null);
   const [fieldPdfWidth, setFieldPdfWidth] = useState(600);
   const [mode, setMode] = useState<InteractionMode>("idle");
@@ -197,7 +200,7 @@ function NewDocumentWizard() {
       }
       if (fieldsRes.ok) {
         const data: SignatureField[] = await fieldsRes.json();
-        setFields(data.map((f) => ({ ...f, id: f.id })));
+        setFields(data.map((f) => ({ ...f, id: f.id, field_type: f.field_type || "signature" })));
       }
 
       setCurrentStep(2);
@@ -217,15 +220,19 @@ function NewDocumentWizard() {
     const rect = container.getBoundingClientRect();
     const xPct = ((e.clientX - rect.left) / rect.width) * 100;
     const yPct = ((e.clientY - rect.top) / rect.height) * 100;
-    const x = Math.max(0, Math.min(100 - DEFAULT_FIELD_WIDTH, xPct - DEFAULT_FIELD_WIDTH / 2));
-    const y = Math.max(0, Math.min(100 - DEFAULT_FIELD_HEIGHT, yPct - DEFAULT_FIELD_HEIGHT / 2));
+    const config = FIELD_TYPE_CONFIG[selectedFieldType];
+    const fw = config.defaultWidth;
+    const fh = config.defaultHeight;
+    const x = Math.max(0, Math.min(100 - fw, xPct - fw / 2));
+    const y = Math.max(0, Math.min(100 - fh, yPct - fh / 2));
     const newField: FieldDraft = {
       id: crypto.randomUUID(),
       signer_id: selectedSigner,
+      field_type: selectedFieldType,
       page: fieldCurrentPage,
       x, y,
-      width: DEFAULT_FIELD_WIDTH,
-      height: DEFAULT_FIELD_HEIGHT,
+      width: fw,
+      height: fh,
     };
     setFields((prev) => [...prev, newField]);
     setSelectedFieldId(newField.id);
@@ -303,6 +310,7 @@ function NewDocumentWizard() {
         body: JSON.stringify({
           fields: fields.map((f) => ({
             signer_id: f.signer_id,
+            field_type: f.field_type,
             page: f.page,
             x: f.x,
             y: f.y,
@@ -788,8 +796,9 @@ function NewDocumentWizard() {
                       zIndex: isSelected ? 20 : 10,
                     }}
                   >
-                    <span className={`text-xs font-medium ${color.text} select-none pointer-events-none`}>
-                      {signer?.name || signer?.email?.split("@")[0] || "署名"}
+                    <span className={`text-[10px] font-medium ${color.text} select-none pointer-events-none flex items-center gap-0.5`}>
+                      <span>{FIELD_TYPE_CONFIG[f.field_type]?.icon}</span>
+                      <span>{FIELD_TYPE_CONFIG[f.field_type]?.label}</span>
                     </span>
                     <button
                       onClick={(e) => { e.stopPropagation(); removeField(f.id); }}
@@ -824,7 +833,9 @@ function NewDocumentWizard() {
               {pageFields.length === 0 && selectedSigner && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="bg-black bg-opacity-5 rounded-xl px-8 py-6 text-center">
-                    <p className="text-sm text-gray-500 font-medium">ここをクリックして署名欄を配置</p>
+                    <p className="text-sm text-gray-500 font-medium">
+                      {FIELD_TYPE_CONFIG[selectedFieldType].icon} {FIELD_TYPE_CONFIG[selectedFieldType].label}を配置するにはクリック
+                    </p>
                   </div>
                 </div>
               )}
@@ -838,10 +849,34 @@ function NewDocumentWizard() {
             </div>
           </div>
 
-          {/* Right: Signer selection + field list */}
-          <div className="w-72 flex-shrink-0 space-y-4">
-            <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-700">
-              署名者を選択し、PDF上をクリックして署名欄を配置してください。
+          {/* Right: Field type picker + Signer selection + field list */}
+          <div className="w-80 flex-shrink-0 space-y-4">
+            {/* Field type picker */}
+            <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <span className="text-sm font-semibold text-gray-700">入力項目を選択</span>
+                <p className="text-[10px] text-gray-500 mt-0.5">選んでからPDFをクリックで配置</p>
+              </div>
+              <div className="p-3 grid grid-cols-4 gap-1.5">
+                {FIELD_TYPE_ORDER.map((ft) => {
+                  const config = FIELD_TYPE_CONFIG[ft];
+                  return (
+                    <button
+                      key={ft}
+                      type="button"
+                      onClick={() => setSelectedFieldType(ft)}
+                      className={`flex flex-col items-center justify-center rounded-lg px-1 py-2 text-[10px] font-medium transition-all ${
+                        selectedFieldType === ft
+                          ? "bg-blue-100 text-blue-700 ring-2 ring-blue-400 shadow-sm"
+                          : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
+                      }`}
+                    >
+                      <span className="text-base mb-0.5">{config.icon}</span>
+                      <span>{config.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
@@ -875,7 +910,7 @@ function NewDocumentWizard() {
 
             <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-700">署名欄一覧</span>
+                <span className="text-sm font-semibold text-gray-700">配置済み項目</span>
                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{fields.length}件</span>
               </div>
               <div className="p-2 space-y-0.5 max-h-48 overflow-y-auto">
@@ -885,6 +920,7 @@ function NewDocumentWizard() {
                   fields.map((f) => {
                     const signer = createdSigners.find((s) => s.id === f.signer_id);
                     const color = getSignerColor(f.signer_id);
+                    const ftConfig = FIELD_TYPE_CONFIG[f.field_type];
                     return (
                       <div
                         key={f.id}
@@ -895,7 +931,8 @@ function NewDocumentWizard() {
                       >
                         <div className="flex items-center gap-2">
                           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color.hex }} />
-                          <span className="text-gray-700 truncate max-w-[100px]">{signer?.name || signer?.email?.split("@")[0]}</span>
+                          <span>{ftConfig?.icon}</span>
+                          <span className="text-gray-700 truncate max-w-[80px]">{ftConfig?.label}</span>
                           <span className="text-gray-400">P{f.page}</span>
                         </div>
                         <button onClick={(e) => { e.stopPropagation(); removeField(f.id); }} className="text-gray-300 hover:text-red-500">
@@ -967,9 +1004,18 @@ function NewDocumentWizard() {
 
               {/* Fields summary */}
               <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">署名欄</h3>
-                <div className="rounded-lg bg-gray-50 p-4">
-                  <div className="text-sm text-gray-700">合計 <strong>{fields.length}</strong> 件の署名欄が設定されています。</div>
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">入力項目 ({fields.length}件)</h3>
+                <div className="rounded-lg bg-gray-50 p-4 space-y-1.5">
+                  {FIELD_TYPE_ORDER.filter((ft) => fields.some((f) => f.field_type === ft)).map((ft) => {
+                    const count = fields.filter((f) => f.field_type === ft).length;
+                    const config = FIELD_TYPE_CONFIG[ft];
+                    return (
+                      <div key={ft} className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">{config.icon} {config.label}</span>
+                        <span className="text-gray-500 font-medium">{count}件</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

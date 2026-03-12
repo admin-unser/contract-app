@@ -56,11 +56,28 @@ export interface TemplateWithFolder extends Template {
   template_folders: TemplateFolder | null;
 }
 
+// フィールドタイプ
+export type FieldType = "signature" | "name" | "company" | "address" | "date" | "stamp" | "text" | "checkbox";
+
+export const FIELD_TYPE_CONFIG: Record<FieldType, { label: string; icon: string; defaultWidth: number; defaultHeight: number }> = {
+  signature: { label: "署名", icon: "✍️", defaultWidth: 20, defaultHeight: 5 },
+  name:      { label: "氏名", icon: "👤", defaultWidth: 18, defaultHeight: 3.5 },
+  company:   { label: "会社名", icon: "🏢", defaultWidth: 22, defaultHeight: 3.5 },
+  address:   { label: "住所", icon: "📍", defaultWidth: 30, defaultHeight: 3.5 },
+  date:      { label: "日付", icon: "📅", defaultWidth: 14, defaultHeight: 3.5 },
+  stamp:     { label: "印影", icon: "🔴", defaultWidth: 6, defaultHeight: 6 },
+  text:      { label: "テキスト", icon: "📝", defaultWidth: 20, defaultHeight: 3.5 },
+  checkbox:  { label: "チェック", icon: "☑️", defaultWidth: 4, defaultHeight: 4 },
+};
+
 // 署名フィールド（PDF上の位置情報、パーセンテージ）
 export interface SignatureField {
   id: string;
   document_id: string;
   signer_id: string;
+  field_type: FieldType;
+  label?: string | null;
+  field_value?: string | null;
   page: number;
   x: number;
   y: number;
