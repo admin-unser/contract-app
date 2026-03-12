@@ -2,10 +2,10 @@ import { type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 const publicPaths = ['/login', '/signup'];
-const signPathPrefix = '/sign/';
+const publicPrefixes = ['/sign/', '/verify/', '/api/otp/', '/api/verify/', '/api/sign'];
 
 function isPublicPath(pathname: string): boolean {
-  if (pathname.startsWith(signPathPrefix)) return true;
+  if (publicPrefixes.some((p) => pathname.startsWith(p))) return true;
   return publicPaths.some((p) => pathname === p || pathname.startsWith(p + '/'));
 }
 
