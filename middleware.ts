@@ -1,5 +1,5 @@
-import { type NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/middleware';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 const publicPaths = ['/login', '/signup'];
 const publicPrefixes = ['/sign/', '/verify/', '/api/otp/', '/api/verify/', '/api/sign'];
@@ -11,31 +11,37 @@ function isPublicPath(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const response = await updateSession(request);
+  const response = NextResponse.next({ request });
 
-  if (isPublicPath(pathname)) return response;
-
-  const supabase = await import('@supabase/ssr').then((m) =>
-    m.createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll: () => request.cookies.getAll(),
-          setAll: () => {},
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
         },
-      }
-    )
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
   );
+
+  // Refresh session token
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (isPublicPath(pathname)) return response;
 
   if (!user && pathname !== '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirectTo', pathname);
-    return Response.redirect(url);
+    return NextResponse.redirect(url);
   }
 
   return response;
