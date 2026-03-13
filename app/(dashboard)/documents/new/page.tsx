@@ -772,215 +772,331 @@ function NewDocumentWizard() {
 
       {/* ═══════ STEP 3: 入力位置の設定 ═══════ */}
       {currentStep === 2 && (
-        <div className="flex gap-6">
-          {/* Left: PDF with field overlays */}
-          <div className="flex-1 min-w-0">
-            <div
-              ref={fieldContainerRef}
-              className={`relative bg-white rounded-xl border-2 overflow-hidden select-none transition-colors ${
-                dragOverPdf ? "border-blue-400 bg-blue-50/30" : "border-gray-200"
-              }`}
-              style={{ minHeight: 500 }}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onDragOver={(e) => { e.preventDefault(); setDragOverPdf(true); }}
-              onDragLeave={() => setDragOverPdf(false)}
-              onDrop={handlePdfDrop}
-            >
-              {pdfUrl && (
-                <Document
-                  file={pdfUrl}
-                  onLoadSuccess={({ numPages }) => setFieldTotalPages(numPages)}
-                  loading={<div className="flex items-center justify-center h-[600px] text-gray-400">PDF読み込み中...</div>}
-                  error={<div className="flex items-center justify-center h-[600px] text-red-400">PDFの読み込みに失敗しました</div>}
-                >
-                  <Page pageNumber={fieldCurrentPage} width={fieldPdfWidth} renderTextLayer={false} renderAnnotationLayer={false} />
-                </Document>
-              )}
-
-              {/* Field overlays */}
-              {pageFields.map((f) => {
-                const color = getSignerColor(f.signer_id);
-                const signer = createdSigners.find((s) => s.id === f.signer_id);
-                const isSelected = selectedFieldId === f.id;
-                return (
-                  <div
-                    key={f.id}
-                    data-field-id={f.id}
-                    onMouseDown={(e) => handleFieldMouseDown(f.id, e)}
-                    className={`absolute border-2 ${color.border} ${color.bg} bg-opacity-60 rounded cursor-move flex items-center justify-center transition-shadow ${
-                      isSelected ? `ring-2 ${color.ring} ring-offset-1 shadow-lg` : "hover:shadow-md"
-                    }`}
-                    style={{
-                      left: `${f.x}%`, top: `${f.y}%`,
-                      width: `${f.width}%`, height: `${f.height}%`,
-                      zIndex: isSelected ? 20 : 10,
-                    }}
-                  >
-                    <span className={`text-[10px] font-medium ${color.text} select-none pointer-events-none flex items-center gap-0.5`}>
-                      <span>{FIELD_TYPE_CONFIG[f.field_type]?.icon}</span>
-                      <span>{FIELD_TYPE_CONFIG[f.field_type]?.label}</span>
-                    </span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeField(f.id); }}
-                      className="absolute -top-2.5 -right-2.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center shadow-sm"
-                      style={{ opacity: isSelected ? 1 : 0 }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      &times;
-                    </button>
-                    {isSelected && (
-                      <>
-                        {(["nw", "ne", "sw", "se"] as ResizeHandle[]).map((handle) => (
-                          <div
-                            key={handle}
-                            onMouseDown={(e) => handleResizeMouseDown(f.id, handle, e)}
-                            className="absolute w-3 h-3 bg-white border-2 rounded-sm shadow-sm z-20"
-                            style={{
-                              borderColor: color.hex,
-                              cursor: handle === "nw" || handle === "se" ? "nwse-resize" : "nesw-resize",
-                              ...(handle.includes("n") ? { top: -5 } : { bottom: -5 }),
-                              ...(handle.includes("w") ? { left: -5 } : { right: -5 }),
-                            }}
-                          />
-                        ))}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-
-              {/* Empty state hint */}
-              {pageFields.length === 0 && selectedSigner && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-black bg-opacity-5 rounded-xl px-8 py-6 text-center">
-                    <p className="text-sm text-gray-500 font-medium">
-                      右の入力項目をドラッグしてここにドロップ
-                    </p>
-                  </div>
-                </div>
-              )}
-              {/* Drag over hint */}
-              {dragOverPdf && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                  <div className="bg-blue-500 bg-opacity-10 border-2 border-dashed border-blue-400 rounded-xl px-8 py-6 text-center">
-                    <p className="text-sm text-blue-600 font-semibold">ここにドロップして配置</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Page navigation */}
-            <div className="flex items-center justify-center gap-4 mt-3">
-              <button onClick={() => setFieldCurrentPage(Math.max(1, fieldCurrentPage - 1))} disabled={fieldCurrentPage <= 1} className="text-sm text-gray-500 hover:text-blue-600 disabled:opacity-30">&larr; 前のページ</button>
-              <span className="text-sm text-gray-600">{fieldCurrentPage} / {fieldTotalPages}</span>
-              <button onClick={() => setFieldCurrentPage(Math.min(fieldTotalPages, fieldCurrentPage + 1))} disabled={fieldCurrentPage >= fieldTotalPages} className="text-sm text-gray-500 hover:text-blue-600 disabled:opacity-30">次のページ &rarr;</button>
-            </div>
-          </div>
-
-          {/* Right: Field type picker + Signer selection + field list */}
-          <div className="w-80 flex-shrink-0 space-y-4">
-            {/* Field type picker */}
-            <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-                <span className="text-sm font-semibold text-gray-700">入力項目を選択</span>
-                <p className="text-[10px] text-gray-500 mt-0.5">ドラッグしてPDFに配置</p>
-              </div>
-              <div className="p-3 grid grid-cols-4 gap-1.5">
-                {FIELD_TYPE_ORDER.map((ft) => {
-                  const config = FIELD_TYPE_CONFIG[ft];
-                  const canDrag = !!selectedSigner;
-                  return (
-                    <div
-                      key={ft}
-                      draggable={canDrag}
-                      onDragStart={(e) => {
-                        e.dataTransfer.setData("fieldType", ft);
-                        e.dataTransfer.effectAllowed = "copy";
-                        setSelectedFieldType(ft);
-                      }}
-                      onClick={() => setSelectedFieldType(ft)}
-                      className={`flex flex-col items-center justify-center rounded-lg px-1 py-2 text-[10px] font-medium transition-all ${
-                        !canDrag ? "opacity-40 cursor-not-allowed" :
-                        selectedFieldType === ft
-                          ? "bg-blue-100 text-blue-700 ring-2 ring-blue-400 shadow-sm cursor-grab"
-                          : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200 cursor-grab"
-                      }`}
-                    >
-                      <span className="text-base mb-0.5">{config.icon}</span>
-                      <span>{config.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                <span className="text-sm font-semibold text-gray-700">署名者を選択</span>
-              </div>
-              <div className="p-3 space-y-1">
+        <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+          {/* Toolbar */}
+          <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 sticky top-0 z-40">
+            <div className="flex items-center justify-between h-14">
+              {/* Left: Signer tabs */}
+              <div className="flex items-center gap-1">
                 {createdSigners.map((s, i) => {
                   const color = SIGNER_COLORS[i % SIGNER_COLORS.length];
                   const fieldCount = fields.filter((f) => f.signer_id === s.id).length;
+                  const isActive = selectedSigner === s.id;
                   return (
                     <button
                       key={s.id}
                       onClick={() => setSelectedSigner(s.id)}
-                      className={`w-full text-left rounded-lg px-3 py-2.5 text-sm transition-all flex items-center gap-2.5 ${
-                        selectedSigner === s.id
-                          ? `${color.bg} ${color.text} font-medium ring-1 ${color.ring}`
-                          : "text-gray-700 hover:bg-gray-50"
+                      className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        isActive
+                          ? "bg-white shadow-sm border border-gray-200"
+                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      <div className="w-3.5 h-3.5 rounded-full flex-shrink-0" style={{ backgroundColor: color.hex }} />
-                      <span className="flex-1 truncate">{s.name || s.email}</span>
-                      {fieldCount > 0 && (
-                        <span className={`text-xs px-1.5 py-0.5 rounded-full ${color.bg} ${color.text}`}>{fieldCount}</span>
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-sm"
+                        style={{ backgroundColor: color.hex }}
+                      >
+                        {(s.name || s.email)[0].toUpperCase()}
+                      </div>
+                      <span className={`hidden sm:inline truncate max-w-[100px] ${isActive ? "text-gray-800" : ""}`}>
+                        {s.name || s.email.split("@")[0]}
+                      </span>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                        isActive ? `${color.bg} ${color.text}` : "bg-gray-100 text-gray-400"
+                      }`}>{fieldCount}</span>
+                      {isActive && (
+                        <div className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full" style={{ backgroundColor: color.hex }} />
                       )}
                     </button>
                   );
                 })}
               </div>
+
+              {/* Center: Page navigation */}
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-1 py-1">
+                <button
+                  onClick={() => setFieldCurrentPage(Math.max(1, fieldCurrentPage - 1))}
+                  disabled={fieldCurrentPage <= 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:shadow-none text-gray-600 transition-all"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><polyline points="15 18 9 12 15 6" /></svg>
+                </button>
+                <span className="text-xs font-semibold text-gray-700 min-w-[60px] text-center">
+                  {fieldCurrentPage} / {fieldTotalPages} ページ
+                </span>
+                <button
+                  onClick={() => setFieldCurrentPage(Math.min(fieldTotalPages, fieldCurrentPage + 1))}
+                  disabled={fieldCurrentPage >= fieldTotalPages}
+                  className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:shadow-none text-gray-600 transition-all"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><polyline points="9 18 15 12 9 6" /></svg>
+                </button>
+              </div>
+
+              {/* Right: Field count summary */}
+              <div className="flex items-center gap-3">
+                <div className="hidden md:flex items-center gap-1.5 text-xs text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>
+                  <span className="font-medium">{fields.length}</span> 項目配置済み
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main content area */}
+          <div className="flex" style={{ height: "calc(100vh - 220px)" }}>
+            {/* Left: Field palette sidebar */}
+            <div className="w-72 flex-shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
+              {/* Field types section */}
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-3 h-3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                  </div>
+                  <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">入力フィールド</span>
+                </div>
+                <p className="text-[11px] text-gray-400 mb-4 leading-relaxed">ドラッグ&ドロップで文書上に配置してください</p>
+
+                <div className="space-y-1.5">
+                  {FIELD_TYPE_ORDER.map((ft) => {
+                    const config = FIELD_TYPE_CONFIG[ft];
+                    const canDrag = !!selectedSigner;
+                    const isSelected = selectedFieldType === ft;
+                    const count = fields.filter((f) => f.field_type === ft).length;
+                    return (
+                      <div
+                        key={ft}
+                        draggable={canDrag}
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("fieldType", ft);
+                          e.dataTransfer.effectAllowed = "copy";
+                          setSelectedFieldType(ft);
+                        }}
+                        onClick={() => setSelectedFieldType(ft)}
+                        className={`group flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium transition-all ${
+                          !canDrag ? "opacity-40 cursor-not-allowed" :
+                          isSelected
+                            ? "bg-blue-50 text-blue-700 ring-1 ring-blue-200 shadow-sm cursor-grab active:cursor-grabbing"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-800 cursor-grab active:cursor-grabbing border border-transparent hover:border-gray-200"
+                        }`}
+                      >
+                        <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg transition-colors ${
+                          isSelected ? "bg-blue-100" : "bg-gray-100 group-hover:bg-gray-200"
+                        }`}>
+                          {config.icon}
+                        </span>
+                        <span className="flex-1">{config.label}</span>
+                        {count > 0 && (
+                          <span className={`text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center ${
+                            isSelected ? "bg-blue-200 text-blue-800" : "bg-gray-200 text-gray-500"
+                          }`}>{count}</span>
+                        )}
+                        {canDrag && (
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-4 h-4 transition-opacity ${isSelected ? "opacity-50" : "opacity-0 group-hover:opacity-30"}`}>
+                            <circle cx="9" cy="6" r="1" fill="currentColor" /><circle cx="15" cy="6" r="1" fill="currentColor" />
+                            <circle cx="9" cy="12" r="1" fill="currentColor" /><circle cx="15" cy="12" r="1" fill="currentColor" />
+                            <circle cx="9" cy="18" r="1" fill="currentColor" /><circle cx="15" cy="18" r="1" fill="currentColor" />
+                          </svg>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="mx-4 border-t border-gray-100" />
+
+              {/* Placed fields section */}
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-md bg-gray-200 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" className="w-3 h-3"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">配置済み</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{fields.length}</span>
+                </div>
+
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {fields.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" className="w-6 h-6">
+                          <path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
+                          <line x1="9" y1="13" x2="15" y2="13" />
+                        </svg>
+                      </div>
+                      <p className="text-xs text-gray-400">まだフィールドが<br/>配置されていません</p>
+                    </div>
+                  ) : (
+                    fields.map((f) => {
+                      const color = getSignerColor(f.signer_id);
+                      const ftConfig = FIELD_TYPE_CONFIG[f.field_type];
+                      const signerIdx = createdSigners.findIndex((s) => s.id === f.signer_id);
+                      return (
+                        <div
+                          key={f.id}
+                          onClick={() => { setSelectedFieldId(f.id); setFieldCurrentPage(f.page); }}
+                          className={`group flex items-center gap-2.5 text-xs py-2.5 px-3 rounded-lg cursor-pointer transition-all ${
+                            selectedFieldId === f.id
+                              ? `${color.bg} border ${color.border} shadow-sm`
+                              : "hover:bg-gray-50 border border-transparent"
+                          }`}
+                        >
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold flex-shrink-0" style={{ backgroundColor: color.hex }}>
+                            {signerIdx + 1}
+                          </div>
+                          <span className="text-sm">{ftConfig?.icon}</span>
+                          <span className="text-gray-700 font-medium flex-1 truncate">{ftConfig?.label}</span>
+                          <span className="text-[10px] text-gray-400 font-mono">P{f.page}</span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeField(f.id); }}
+                            className="w-5 h-5 flex items-center justify-center rounded-md text-gray-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
+                              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-700">配置済み項目</span>
-                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{fields.length}件</span>
-              </div>
-              <div className="p-2 space-y-0.5 max-h-48 overflow-y-auto">
-                {fields.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-3">署名欄を配置してください</p>
-                ) : (
-                  fields.map((f) => {
-                    const signer = createdSigners.find((s) => s.id === f.signer_id);
+            {/* Center: PDF Canvas */}
+            <div className="flex-1 min-w-0 bg-gray-100 overflow-auto flex justify-center py-6 px-4">
+              <div className="relative" style={{ width: "fit-content" }}>
+                {/* Shadow wrapper for the PDF */}
+                <div
+                  ref={fieldContainerRef}
+                  className={`relative bg-white shadow-2xl select-none transition-all ${
+                    dragOverPdf ? "ring-4 ring-blue-400/50 ring-offset-4 ring-offset-gray-100" : ""
+                  }`}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onDragOver={(e) => { e.preventDefault(); setDragOverPdf(true); }}
+                  onDragLeave={() => setDragOverPdf(false)}
+                  onDrop={handlePdfDrop}
+                >
+                  {pdfUrl && (
+                    <Document
+                      file={pdfUrl}
+                      onLoadSuccess={({ numPages }) => setFieldTotalPages(numPages)}
+                      loading={<div className="flex items-center justify-center h-[700px] w-[500px] text-gray-400"><div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" /></div>}
+                      error={<div className="flex items-center justify-center h-[700px] w-[500px] text-red-400">PDFの読み込みに失敗しました</div>}
+                    >
+                      <Page pageNumber={fieldCurrentPage} width={fieldPdfWidth} renderTextLayer={false} renderAnnotationLayer={false} />
+                    </Document>
+                  )}
+
+                  {/* Field overlays */}
+                  {pageFields.map((f) => {
                     const color = getSignerColor(f.signer_id);
-                    const ftConfig = FIELD_TYPE_CONFIG[f.field_type];
+                    const isSelected = selectedFieldId === f.id;
+                    const signerIdx = createdSigners.findIndex((s) => s.id === f.signer_id);
                     return (
                       <div
                         key={f.id}
-                        onClick={() => { setSelectedFieldId(f.id); setFieldCurrentPage(f.page); }}
-                        className={`flex items-center justify-between text-xs py-2 px-2.5 rounded-lg cursor-pointer transition-colors ${
-                          selectedFieldId === f.id ? `${color.bg} border ${color.border}` : "hover:bg-gray-50 border border-transparent"
+                        data-field-id={f.id}
+                        onMouseDown={(e) => handleFieldMouseDown(f.id, e)}
+                        className={`absolute rounded-md cursor-move flex items-center justify-center transition-all ${
+                          isSelected
+                            ? "shadow-lg ring-2 ring-offset-1"
+                            : "hover:shadow-md hover:brightness-95"
                         }`}
+                        style={{
+                          left: `${f.x}%`, top: `${f.y}%`,
+                          width: `${f.width}%`, height: `${f.height}%`,
+                          zIndex: isSelected ? 20 : 10,
+                          backgroundColor: `${color.hex}18`,
+                          border: `2px solid ${color.hex}`,
+                          boxShadow: isSelected ? `0 0 0 2px ${color.hex}40` : undefined,
+                          ringColor: isSelected ? color.hex : undefined,
+                        }}
                       >
-                        <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color.hex }} />
-                          <span>{ftConfig?.icon}</span>
-                          <span className="text-gray-700 truncate max-w-[80px]">{ftConfig?.label}</span>
-                          <span className="text-gray-400">P{f.page}</span>
+                        {/* Signer badge */}
+                        <div
+                          className="absolute -top-2 -left-2 w-4 h-4 rounded-full flex items-center justify-center text-white text-[7px] font-bold shadow-md z-30"
+                          style={{ backgroundColor: color.hex }}
+                        >
+                          {signerIdx + 1}
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); removeField(f.id); }} className="text-gray-300 hover:text-red-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+
+                        <span className="text-[10px] font-semibold select-none pointer-events-none flex items-center gap-1" style={{ color: color.hex }}>
+                          <span className="text-xs">{FIELD_TYPE_CONFIG[f.field_type]?.icon}</span>
+                          <span>{FIELD_TYPE_CONFIG[f.field_type]?.label}</span>
+                        </span>
+
+                        {/* Delete button */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); removeField(f.id); }}
+                          className="absolute -top-2.5 -right-2.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center shadow-lg transition-all"
+                          style={{ opacity: isSelected ? 1 : 0 }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5">
                             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                           </svg>
                         </button>
+
+                        {/* Resize handles */}
+                        {isSelected && (
+                          <>
+                            {(["nw", "ne", "sw", "se"] as ResizeHandle[]).map((handle) => (
+                              <div
+                                key={handle}
+                                onMouseDown={(e) => handleResizeMouseDown(f.id, handle, e)}
+                                className="absolute w-3 h-3 bg-white rounded-full shadow-md z-20 border-2"
+                                style={{
+                                  borderColor: color.hex,
+                                  cursor: handle === "nw" || handle === "se" ? "nwse-resize" : "nesw-resize",
+                                  ...(handle.includes("n") ? { top: -6 } : { bottom: -6 }),
+                                  ...(handle.includes("w") ? { left: -6 } : { right: -6 }),
+                                }}
+                              />
+                            ))}
+                          </>
+                        )}
                       </div>
                     );
-                  })
-                )}
+                  })}
+
+                  {/* Empty state hint */}
+                  {pageFields.length === 0 && selectedSigner && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="1.5" className="w-8 h-8">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-semibold text-gray-600">フィールドをドラッグ&ドロップ</p>
+                          <p className="text-xs text-gray-400 mt-1">左パネルから項目をドラッグして配置</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Drag over overlay */}
+                  {dragOverPdf && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 bg-blue-500/5">
+                      <div className="flex flex-col items-center gap-3 bg-white/90 backdrop-blur-sm rounded-2xl px-10 py-8 shadow-xl border border-blue-200">
+                        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center animate-bounce">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" className="w-6 h-6">
+                            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-bold text-blue-600">ここにドロップして配置</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
