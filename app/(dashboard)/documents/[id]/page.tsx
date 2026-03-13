@@ -87,64 +87,26 @@ export default async function DocumentDetailPage({
             </span>
           </div>
 
-          {/* Workflow steps for draft documents */}
-          {needsSetup && (
-            <div className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-4 space-y-3">
-              <p className="text-sm font-semibold text-blue-800">送信までのステップ</p>
-              {/* Step 1: Signature fields */}
-              <div className="flex items-start gap-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${hasFields ? "bg-green-500 text-white" : "bg-blue-600 text-white"}`}>
-                  {hasFields ? "✓" : "1"}
-                </div>
-                <div className="flex-1">
-                  <p className={`text-sm font-medium ${hasFields ? "text-green-700" : "text-blue-800"}`}>
-                    {hasFields ? "署名位置設定済み" : "署名位置を設定してください"}
-                  </p>
-                  <Link
-                    href={`/documents/${document.id}/fields`}
-                    className={`mt-1 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                      hasFields
-                        ? "border border-gray-300 text-gray-600 hover:bg-white"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
-                    }`}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <path d="M9 14l2 2 4-4" />
-                    </svg>
-                    {hasFields ? "署名位置を変更" : "署名位置設定"}
-                  </Link>
-                </div>
-              </div>
-              {/* Step 2: Send emails */}
-              <div className="flex items-start gap-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${document.status === "sent" ? "bg-green-500 text-white" : "bg-gray-300 text-gray-600"}`}>
-                  2
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-700">署名依頼メールを送信</p>
-                  <div className="mt-1">
-                    <SendEmailButton documentId={document.id} />
-                  </div>
-                </div>
-              </div>
+          {/* Draft: show link to continue setup in wizard */}
+          {isDraft && signers.length > 0 && (
+            <div className="mt-4">
+              <Link
+                href="/documents/new"
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+                設定を続ける
+              </Link>
             </div>
           )}
 
-          {/* Action buttons for sent documents */}
-          {!needsSetup && signers.length > 0 && hasUnsigned && (
-            <div className="mt-4 flex flex-wrap gap-2">
+          {/* Sent: small re-send option only */}
+          {document.status === "sent" && hasUnsigned && (
+            <div className="mt-3">
               <SendEmailButton documentId={document.id} />
-              <Link
-                href={`/documents/${document.id}/fields`}
-                className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <path d="M9 14l2 2 4-4" />
-                </svg>
-                署名位置設定
-              </Link>
             </div>
           )}
         </div>

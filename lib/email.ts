@@ -8,7 +8,7 @@ function getResend() {
   return _resend;
 }
 
-const FROM_ADDRESS = process.env.EMAIL_FROM ?? "UNSER Sign <noreply@unsersign.com>";
+const FROM_ADDRESS = process.env.EMAIL_FROM ?? "UNSER Sign <onboarding@resend.dev>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 /** Dev-mode: log email to console instead of sending */
@@ -84,7 +84,13 @@ export async function sendSigningRequest(params: SendSigningRequestParams) {
   `;
 
   if (IS_DEV_MODE) return devSendEmail({ to: signerEmail, subject, html: body });
-  return getResend().emails.send({ from: FROM_ADDRESS, to: signerEmail, subject, html: body });
+  const result = await getResend().emails.send({ from: FROM_ADDRESS, to: signerEmail, subject, html: body });
+  if (result.error) {
+    console.error("[Resend Error] sendSigningRequest:", JSON.stringify(result.error));
+    throw new Error(result.error.message || "メール送信に失敗しました");
+  }
+  console.log("[Resend OK] Sent signing request to", signerEmail, "id:", result.data?.id);
+  return result;
 }
 
 interface SendCompletionNotificationParams {
@@ -129,7 +135,13 @@ export async function sendCompletionNotification(params: SendCompletionNotificat
 
   const subject = `【署名完了】${documentTitle}`;
   if (IS_DEV_MODE) return devSendEmail({ to: ownerEmail, subject, html: body });
-  return getResend().emails.send({ from: FROM_ADDRESS, to: ownerEmail, subject, html: body });
+  const result = await getResend().emails.send({ from: FROM_ADDRESS, to: ownerEmail, subject, html: body });
+  if (result.error) {
+    console.error("[Resend Error] sendCompletionNotification:", JSON.stringify(result.error));
+    throw new Error(result.error.message || "メール送信に失敗しました");
+  }
+  console.log("[Resend OK] Sent completion notification to", ownerEmail, "id:", result.data?.id);
+  return result;
 }
 
 interface SendOtpEmailParams {
@@ -177,5 +189,11 @@ export async function sendOtpEmail(params: SendOtpEmailParams) {
     console.log(`\n🔑 [DEV OTP] Code for ${signerEmail}: ${code}\n`);
     return devSendEmail({ to: signerEmail, subject, html: body });
   }
-  return getResend().emails.send({ from: FROM_ADDRESS, to: signerEmail, subject, html: body });
+  const result = await getResend().emails.send({ from: FROM_ADDRESS, to: signerEmail, subject, html: body });
+  if (result.error) {
+    console.error("[Resend Error] sendOtpEmail:", JSON.stringify(result.error));
+    throw new Error(result.error.message || "OTPメール送信に失敗しました");
+  }
+  console.log("[Resend OK] Sent OTP to", signerEmail, "id:", result.data?.id);
+  return result;
 }

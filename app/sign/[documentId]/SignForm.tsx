@@ -7,33 +7,34 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import type { SignatureField, FieldType } from "@/lib/types";
 import { FIELD_TYPE_CONFIG } from "@/lib/types";
-import { OtpVerification } from "@/components/OtpVerification";
 import { SignatureGenerator } from "@/components/SignatureGenerator";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-type SignatureData = { type: "typed"; text: string } | { type: "drawing"; dataUrl: string } | { type: "stamp"; dataUrl: string };
+type SignatureData =
+  | { type: "typed"; text: string }
+  | { type: "drawing"; dataUrl: string }
+  | { type: "stamp"; dataUrl: string };
 
 export function SignForm({
   documentId,
+  documentTitle,
   signerId,
   token,
   pdfUrl,
   fields,
   signerName,
   companyName,
-  otpVerified: initialOtpVerified,
 }: {
   documentId: string;
+  documentTitle: string;
   signerId: string;
   token: string | null;
   pdfUrl: string | null;
   fields: SignatureField[];
   signerName: string;
   companyName?: string;
-  otpVerified: boolean;
 }) {
-  const [otpDone, setOtpDone] = useState(initialOtpVerified);
   const [signature, setSignature] = useState<SignatureData | null>(null);
   const [showSignatureGen, setShowSignatureGen] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
@@ -42,11 +43,10 @@ export function SignForm({
   const [currentPage, setCurrentPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(true);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
-  const [pdfWidth, setPdfWidth] = useState(700);
+  const [pdfWidth, setPdfWidth] = useState(600);
   const router = useRouter();
-
-  const pageFields = fields.filter((f) => f.page === currentPage);
 
   // Auto-fill name/company/date fields
   useEffect(() => {
@@ -80,9 +80,30 @@ export function SignForm({
 
   const allFieldsComplete = fields.every(isFieldComplete);
   const completedCount = fields.filter(isFieldComplete).length;
+  const requiredCount = fields.length;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // Scroll PDF to show a specific field
+  function scrollToField(f: SignatureField) {
+    if (f.page !== currentPage) {
+      setCurrentPage(f.page);
+    }
+    setActiveFieldId(f.id);
+    // Open appropriate modal/input for the field
+    if (f.field_type === "signature" || f.field_type === "stamp") {
+      setShowSignatureGen(true);
+    } else if (f.field_type === "checkbox") {
+      updateFieldValue(f.id, fieldValues[f.id] === "true" ? "" : "true");
+    }
+    // Scroll the PDF container
+    setTimeout(() => {
+      const el = document.getElementById(`field-overlay-${f.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
+  }
+
+  async function handleSubmit() {
     if (!signature) {
       setError("署名を作成してください。");
       return;
@@ -97,13 +118,7 @@ export function SignForm({
       const res = await fetch("/api/sign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          documentId,
-          signerId,
-          token,
-          signature,
-          fieldValues,
-        }),
+        body: JSON.stringify({ documentId, signerId, token, signature, fieldValues }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -118,10 +133,6 @@ export function SignForm({
     }
   }
 
-  if (token && !otpDone) {
-    return <OtpVerification token={token} onVerified={() => setOtpDone(true)} />;
-  }
-
   function renderFieldOverlay(f: SignatureField) {
     const isActive = activeFieldId === f.id;
     const complete = isFieldComplete(f);
@@ -132,30 +143,26 @@ export function SignForm({
         ? "border-2 border-green-400 bg-green-50/80"
         : isActive
         ? "border-2 border-blue-500 bg-blue-50/90 ring-2 ring-blue-300 shadow-lg z-20"
-        : "border-2 border-blue-400 bg-blue-50/60 hover:bg-blue-100/70 hover:shadow-md animate-pulse"
+        : "border-2 border-red-400 bg-red-50/60 hover:bg-red-100/70 hover:shadow-md"
     }`;
 
     return (
       <div
         key={f.id}
+        id={`field-overlay-${f.id}`}
         className={baseClasses}
         style={{
-          left: `${f.x}%`, top: `${f.y}%`,
-          width: `${f.width}%`, height: `${f.height}%`,
+          left: `${f.x}%`,
+          top: `${f.y}%`,
+          width: `${f.width}%`,
+          height: `${f.height}%`,
           zIndex: isActive ? 30 : complete ? 15 : 10,
         }}
         onClick={(e) => {
           e.stopPropagation();
-          if (f.field_type === "signature" || f.field_type === "stamp") {
-            setShowSignatureGen(true);
-          } else if (f.field_type === "checkbox") {
-            updateFieldValue(f.id, fieldValues[f.id] === "true" ? "" : "true");
-          } else {
-            setActiveFieldId(isActive ? null : f.id);
-          }
+          scrollToField(f);
         }}
       >
-        {/* Completed content */}
         {complete ? (
           <div className="w-full h-full flex items-center justify-center overflow-hidden p-0.5">
             {(f.field_type === "signature" || f.field_type === "stamp") && signature ? (
@@ -173,9 +180,8 @@ export function SignForm({
             )}
           </div>
         ) : (
-          /* Empty state */
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-[10px] font-medium text-blue-600 select-none flex items-center gap-0.5">
+            <span className="text-[10px] font-medium text-red-600 select-none flex items-center gap-0.5">
               <span>{config.icon}</span>
               <span>{config.label}</span>
             </span>
@@ -185,80 +191,233 @@ export function SignForm({
     );
   }
 
-  // Group fields by type for the input panel
-  const signatureFields = fields.filter((f) => f.field_type === "signature" || f.field_type === "stamp");
-  const inputFields = fields.filter((f) => !["signature", "stamp", "checkbox"].includes(f.field_type));
-  const checkboxFields = fields.filter((f) => f.field_type === "checkbox");
+  const pageFields = fields.filter((f) => f.page === currentPage);
+
+  // Get checklist-style field label
+  function getFieldLabel(f: SignatureField, index: number): string {
+    const config = FIELD_TYPE_CONFIG[f.field_type];
+    return f.label || `${config.label}${fields.filter((ff) => ff.field_type === f.field_type).length > 1 ? index + 1 : ""}`;
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Progress bar */}
-      <div className="rounded-lg bg-white border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">入力進捗</span>
-          <span className="text-sm text-gray-500">{completedCount} / {fields.length} 完了</span>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Top header bar */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+            U
+          </div>
+          <span className="text-sm font-medium text-gray-700 truncate max-w-[300px]">{documentTitle}</span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-2">
-          <div
-            className={`h-2 rounded-full transition-all duration-500 ${allFieldsComplete ? "bg-green-500" : "bg-blue-500"}`}
-            style={{ width: `${fields.length > 0 ? (completedCount / fields.length) * 100 : 0}%` }}
-          />
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+          <span>その他のメニュー</span>
         </div>
       </div>
 
-      {/* PDF Viewer with field overlays */}
-      {pdfUrl && (
-        <div>
-          <div
-            ref={pdfContainerRef}
-            className="relative bg-white rounded-lg border border-gray-200 overflow-hidden"
-            style={{ minHeight: 500 }}
-          >
-            <Document
-              file={pdfUrl}
-              onLoadSuccess={({ numPages: n }) => setNumPages(n)}
-              loading={<div className="flex items-center justify-center h-[600px] text-gray-400">PDF読み込み中...</div>}
-              error={<div className="flex items-center justify-center h-[600px] text-red-400">PDFの読み込みに失敗しました</div>}
-            >
-              <Page pageNumber={currentPage} width={pdfWidth} renderTextLayer={false} renderAnnotationLayer={false} />
-            </Document>
-            {pageFields.map(renderFieldOverlay)}
-          </div>
-
-          {numPages > 1 && (
-            <div className="flex items-center justify-center gap-4 mt-3">
-              <button type="button" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} className="text-sm text-gray-500 hover:text-blue-600 disabled:opacity-30">前のページ</button>
-              <span className="text-sm text-gray-600">{currentPage} / {numPages}</span>
-              <button type="button" onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))} disabled={currentPage >= numPages} className="text-sm text-gray-500 hover:text-blue-600 disabled:opacity-30">次のページ</button>
+      {/* Guide modal */}
+      {showGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">UNSER Signの使い方</h2>
+              <button onClick={() => setShowGuide(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
             </div>
-          )}
+            <div className="px-6 pb-6 space-y-5">
+              {[
+                { num: 1, title: "受信した文書の内容を確認", desc: "スクロールして、受信した文書の内容を確認してください。" },
+                { num: 2, title: "チェックリストを完了", desc: "チェックリストの内容を押すと該当箇所へ移動します。すべてに記入・署名をしてください。" },
+                { num: 3, title: "完成した文書を確認", desc: "すべてに記入・署名が終わりましたら「完了する」ボタンを押します。" },
+              ].map((step) => (
+                <div key={step.num} className="flex gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
+                    {step.num}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-blue-700 text-sm">{step.title}</h3>
+                    <p className="text-xs text-gray-600 mt-0.5">{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="px-6 pb-6">
+              <button
+                onClick={() => setShowGuide(false)}
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
         </div>
       )}
-      {!pdfUrl && (
-        <p className="text-sm text-amber-600">プレビューを読み込めませんでした。署名は可能です。</p>
-      )}
 
-      {/* Input fields panel */}
-      {inputFields.length > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-            <h2 className="text-sm font-semibold text-gray-700">入力項目</h2>
-            <p className="text-xs text-gray-500 mt-0.5">各項目を入力してください。PDF上の対応する位置に反映されます。</p>
+      {/* Main layout: sidebar + PDF */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left sidebar - Checklist */}
+        <div className="w-72 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+          <div className="p-4 border-b border-gray-100">
+            <div className="text-sm font-bold text-gray-900">文書1 (1/1)</div>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">電子署名</span>
+              <span className="text-xs text-gray-500 truncate">{documentTitle}</span>
+            </div>
           </div>
-          <div className="p-5 space-y-3">
-            {inputFields.map((f) => {
+
+          <div className="p-4 border-b border-gray-100">
+            <div className="flex items-center gap-2 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-gray-500">
+                <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+              </svg>
+              <span className="text-sm font-bold text-gray-700">チェックリスト</span>
+            </div>
+            <p className="text-xs text-gray-400">項目を押すと該当箇所へ移動します。</p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            {fields.map((f, i) => {
+              const complete = isFieldComplete(f);
               const config = FIELD_TYPE_CONFIG[f.field_type];
+              const isActive = activeFieldId === f.id;
+              const fieldIndex = fields.filter((ff, fi) => ff.field_type === f.field_type && fi <= i).length;
+              const sameTypeCount = fields.filter((ff) => ff.field_type === f.field_type).length;
+
               return (
-                <div key={f.id}>
-                  <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 mb-1">
-                    <span>{config.icon}</span>
-                    <span>{config.label}</span>
-                    {isFieldComplete(f) && (
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-green-500">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </label>
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => scrollToField(f)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                    isActive
+                      ? "bg-blue-50 border border-blue-200"
+                      : complete
+                      ? "bg-gray-50 hover:bg-gray-100"
+                      : "hover:bg-red-50 border border-transparent"
+                  }`}
+                >
+                  {/* Status badge */}
+                  <span className={`flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                    complete ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                  }`}>
+                    {complete ? "完了" : "必須"}
+                  </span>
+
+                  {/* Icon */}
+                  <span className="text-base">{config.icon}</span>
+
+                  {/* Label */}
+                  <span className={`text-sm truncate ${complete ? "text-gray-500" : "text-gray-800 font-medium"}`}>
+                    {config.label}{sameTypeCount > 1 ? fieldIndex : ""}
+                  </span>
+
+                  {/* Checkmark */}
+                  {complete && (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 text-green-500 ml-auto flex-shrink-0">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bottom bar with progress */}
+          <div className="p-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-gray-700">
+                必須項目：<span className={completedCount === requiredCount ? "text-green-600" : "text-blue-600"}>{completedCount}</span>/{requiredCount}件
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading || !allFieldsComplete}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
+                allFieldsComplete
+                  ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              {loading ? "送信中..." : "完了する"}
+            </button>
+          </div>
+        </div>
+
+        {/* PDF viewer area */}
+        <div className="flex-1 overflow-y-auto bg-gray-200 p-4">
+          {error && (
+            <div className="mb-4 mx-auto max-w-3xl rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm p-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 flex-shrink-0">
+                <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+              {error}
+            </div>
+          )}
+
+          {pdfUrl && (
+            <div className="mx-auto max-w-3xl">
+              <div
+                ref={pdfContainerRef}
+                className="relative bg-white rounded-lg shadow-lg overflow-hidden"
+                style={{ minHeight: 500 }}
+              >
+                <Document
+                  file={pdfUrl}
+                  onLoadSuccess={({ numPages: n }) => setNumPages(n)}
+                  loading={<div className="flex items-center justify-center h-[600px] text-gray-400">PDF読み込み中...</div>}
+                  error={<div className="flex items-center justify-center h-[600px] text-red-400">PDFの読み込みに失敗しました</div>}
+                >
+                  <Page pageNumber={currentPage} width={pdfWidth} renderTextLayer={false} renderAnnotationLayer={false} />
+                </Document>
+                {pageFields.map(renderFieldOverlay)}
+              </div>
+
+              {numPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage <= 1}
+                    className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-30"
+                  >
+                    &lt; 前へ
+                  </button>
+                  <span className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200">
+                    {currentPage} / {numPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))}
+                    disabled={currentPage >= numPages}
+                    className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-30"
+                  >
+                    次へ &gt;
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Inline input for active text field */}
+          {activeFieldId && (() => {
+            const f = fields.find((ff) => ff.id === activeFieldId);
+            if (!f || ["signature", "stamp", "checkbox"].includes(f.field_type)) return null;
+            const config = FIELD_TYPE_CONFIG[f.field_type];
+            return (
+              <div className="mx-auto max-w-3xl mt-4">
+                <div className="bg-white rounded-xl shadow-lg border border-blue-200 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{config.icon}</span>
+                      <span className="font-bold text-gray-800">{config.label}を入力</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveFieldId(null)}
+                      className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                    >
+                      &times;
+                    </button>
+                  </div>
                   <input
                     type={f.field_type === "date" ? "date" : "text"}
                     value={fieldValues[f.id] || ""}
@@ -270,91 +429,22 @@ export function SignForm({
                       f.field_type === "date" ? "" :
                       "テキストを入力"
                     }
-                    className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-1 transition-colors ${
-                      isFieldComplete(f)
-                        ? "border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500"
-                        : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                    }`}
+                    autoFocus
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
                   />
+                  <div className="flex justify-end mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setActiveFieldId(null)}
+                      className="px-6 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
+                    >
+                      確定
+                    </button>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Checkbox fields */}
-      {checkboxFields.length > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
-            <h2 className="text-sm font-semibold text-gray-700">確認事項</h2>
-          </div>
-          <div className="p-5 space-y-2">
-            {checkboxFields.map((f) => (
-              <label key={f.id} className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={fieldValues[f.id] === "true"}
-                  onChange={(e) => updateFieldValue(f.id, e.target.checked ? "true" : "")}
-                  className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">{f.label || "確認しました"}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Signature section */}
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-gray-700">署名</h2>
-            <p className="text-xs text-gray-500 mt-0.5">{signatureFields.length > 0 ? `${signatureFields.length}件の署名欄に適用されます` : "署名を作成してください"}</p>
-          </div>
-          {signature && (
-            <span className="text-xs text-green-600 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              作成済み
-            </span>
-          )}
-        </div>
-        <div className="p-5">
-          {signature ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-4 p-4 rounded-lg bg-green-50 border border-green-200">
-                {signature.type === "typed" ? (
-                  <div className="flex-1 text-lg font-medium text-gray-800 text-center" style={{ fontFamily: "serif" }}>
-                    {signature.text}
-                  </div>
-                ) : (
-                  <div className="flex-1 flex justify-center">
-                    <img src={signature.dataUrl} alt="署名" className="max-h-16 object-contain" />
-                  </div>
-                )}
               </div>
-              <button
-                type="button"
-                onClick={() => { setSignature(null); setShowSignatureGen(true); }}
-                className="w-full rounded-lg border border-gray-300 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                署名を変更する
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowSignatureGen(true)}
-              className="w-full rounded-lg border-2 border-dashed border-blue-300 hover:border-blue-400 hover:bg-blue-50 py-8 text-blue-600 font-medium text-sm transition-all flex flex-col items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8">
-                <path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-              </svg>
-              署名を作成する
-            </button>
-          )}
+            );
+          })()}
         </div>
       </div>
 
@@ -374,29 +464,6 @@ export function SignForm({
           </div>
         </div>
       )}
-
-      {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm p-3 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 flex-shrink-0">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-            <line x1="9" y1="9" x2="15" y2="15" />
-          </svg>
-          {error}
-        </div>
-      )}
-
-      <button
-        type="submit"
-        disabled={loading || !signature || !allFieldsComplete}
-        className={`w-full rounded-lg py-3.5 font-medium text-white text-sm transition-all ${
-          loading || !signature || !allFieldsComplete
-            ? "bg-gray-300 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30"
-        }`}
-      >
-        {loading ? "送信中..." : allFieldsComplete && signature ? "署名して完了する" : "すべての項目を入力してください"}
-      </button>
-    </form>
+    </div>
   );
 }

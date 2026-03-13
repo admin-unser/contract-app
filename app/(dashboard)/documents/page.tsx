@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Document } from "@/lib/types";
 import { FileDropZone } from "@/components/FileDropZone";
 import { DocumentList } from "@/components/DocumentList";
+import { DashboardCharts } from "@/components/DashboardCharts";
 
 export default async function DocumentsPage({
   searchParams,
@@ -18,7 +19,7 @@ export default async function DocumentsPage({
 
   let query = supabase
     .from("documents")
-    .select("*, envelope_signers(id, email, signed_at)")
+    .select("*, envelope_signers(id, email, signed_at, company_name)")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -82,6 +83,9 @@ export default async function DocumentsPage({
           </Link>
         </div>
       )}
+
+      {/* Dashboard charts - only on home */}
+      {!filterStatus && <DashboardCharts />}
 
       {/* Document list */}
       <DocumentList documents={(documents as any[]) ?? []} filterStatus={filterStatus} />

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SignForm } from "./SignForm";
+import { SignPageClient } from "./SignPageClient";
 import type { SignatureField } from "@/lib/types";
 
 export default async function SignPage({
@@ -37,7 +37,7 @@ export default async function SignPage({
 
   const { data: doc } = await supabase
     .from("documents")
-    .select("id, title, file_path, status")
+    .select("id, title, file_path, status, created_at")
     .eq("id", documentId)
     .single();
   if (!doc) notFound();
@@ -49,6 +49,13 @@ export default async function SignPage({
     .eq("id", resolvedSignerId)
     .single();
   if (!signer || signer.signed_at) notFound();
+
+  // Get document owner name
+  const { data: owner } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", (await supabase.from("documents").select("user_id").eq("id", documentId).single()).data?.user_id ?? "")
+    .single();
 
   const { data: urlData } = await supabase.storage
     .from("documents")
@@ -64,30 +71,19 @@ export default async function SignPage({
     .order("page", { ascending: true });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-4xl px-4">
-        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-            <h1 className="text-lg font-bold text-gray-800">{doc.title}</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              署名者: {signer.name || signer.email}
-              {signer.company_name && ` (${signer.company_name})`}
-            </p>
-          </div>
-          <div className="p-6">
-            <SignForm
-              documentId={documentId}
-              signerId={resolvedSignerId}
-              token={token ?? null}
-              pdfUrl={pdfUrl}
-              fields={(fields as SignatureField[]) ?? []}
-              signerName={signer.name || signer.email.split("@")[0]}
-              companyName={signer.company_name || undefined}
-              otpVerified={!!signer.otp_verified}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    <SignPageClient
+      documentId={documentId}
+      documentTitle={doc.title}
+      signerId={resolvedSignerId}
+      token={token ?? null}
+      pdfUrl={pdfUrl}
+      fields={(fields as SignatureField[]) ?? []}
+      signerName={signer.name || signer.email.split("@")[0]}
+      signerEmail={signer.email}
+      companyName={signer.company_name || undefined}
+      otpVerified={!!signer.otp_verified}
+      senderName={owner?.display_name || "送信者"}
+      createdAt={doc.created_at}
+    />
   );
 }

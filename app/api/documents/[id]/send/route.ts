@@ -71,9 +71,14 @@ export async function POST(
     .eq("id", id);
 
   const successCount = results.filter((r) => r.success).length;
+  const failedResults = results.filter((r) => !r.success);
+  if (failedResults.length > 0) {
+    console.error("[Send API] Failed emails:", JSON.stringify(failedResults));
+  }
   return NextResponse.json({
     sent: successCount,
     total: unsignedSigners.length,
     results,
+    ...(failedResults.length > 0 && { errors: failedResults.map(r => r.error) }),
   });
 }

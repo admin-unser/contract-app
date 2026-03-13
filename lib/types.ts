@@ -1,11 +1,23 @@
 export type DocumentStatus = "draft" | "sent" | "completed";
 
+export type DocumentCategory = "業務委託" | "NDA" | "雇用契約" | "売買契約" | "賃貸契約" | "その他";
+
+export const DOCUMENT_CATEGORIES: DocumentCategory[] = [
+  "業務委託",
+  "NDA",
+  "雇用契約",
+  "売買契約",
+  "賃貸契約",
+  "その他",
+];
+
 export interface Document {
   id: string;
   owner_id: string;
   file_path: string;
   title: string;
   status: DocumentStatus;
+  category: DocumentCategory | null;
   document_hash: string | null;
   chain_hash: string | null;
   template_id: string | null;

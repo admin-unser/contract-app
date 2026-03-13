@@ -14,6 +14,7 @@ export async function POST(request: Request) {
 
   const formData = await request.formData();
   const title = (formData.get("title") as string)?.trim() || "";
+  const category = (formData.get("category") as string)?.trim() || null;
   const signersRaw = (formData.get("signers") as string)?.trim() || "";
   const emailMessage = (formData.get("email_message") as string)?.trim() || null;
   const file = formData.get("file") as File | null;
@@ -117,6 +118,7 @@ export async function POST(request: Request) {
       file_path: filePath,
       title: title || (file?.name ?? "無題"),
       status: "draft",
+      category,
       template_id: templateId,
       email_message: emailMessage,
       document_hash: documentHash,
