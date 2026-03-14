@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { SignatureField } from "@/lib/types";
-import { OtpVerification } from "@/components/OtpVerification";
 import { SignForm } from "./SignForm";
 
 interface SignPageClientProps {
@@ -15,7 +14,6 @@ interface SignPageClientProps {
   signerName: string;
   signerEmail: string;
   companyName?: string;
-  otpVerified: boolean;
   senderName: string;
   createdAt: string;
 }
@@ -30,23 +28,10 @@ export function SignPageClient({
   signerName,
   signerEmail,
   companyName,
-  otpVerified,
   senderName,
   createdAt,
 }: SignPageClientProps) {
-  const [otpDone, setOtpDone] = useState(otpVerified);
   const [started, setStarted] = useState(false);
-
-  // OTP verification first
-  if (token && !otpDone) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <OtpVerification token={token} onVerified={() => setOtpDone(true)} />
-        </div>
-      </div>
-    );
-  }
 
   // Landing page - like GMO Sign
   if (!started) {

@@ -8,9 +8,9 @@ import { DashboardCharts } from "@/components/DashboardCharts";
 export default async function DocumentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; folder?: string }>;
 }) {
-  const { status: filterStatus } = await searchParams;
+  const { status: filterStatus, folder: folderId } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -26,8 +26,22 @@ export default async function DocumentsPage({
   if (filterStatus && ["draft", "sent", "completed"].includes(filterStatus)) {
     query = query.eq("status", filterStatus);
   }
+  if (folderId) {
+    query = query.eq("folder_id", folderId);
+  }
 
   const { data: documents } = await query;
+
+  // Get folder name if filtering by folder
+  let folderName: string | null = null;
+  if (folderId) {
+    const { data: folder } = await supabase
+      .from("document_folders")
+      .select("name")
+      .eq("id", folderId)
+      .single();
+    folderName = folder?.name ?? null;
+  }
 
   const statusCounts = { draft: 0, sent: 0, completed: 0 };
   const { data: allDocs } = await supabase
@@ -40,7 +54,9 @@ export default async function DocumentsPage({
     }
   });
 
-  const pageTitle = filterStatus
+  const pageTitle = folderName
+    ? `📁 ${folderName}`
+    : filterStatus
     ? { draft: "下書き", sent: "署名待ち", completed: "完了" }[filterStatus] ?? "ホーム"
     : "ホーム";
 

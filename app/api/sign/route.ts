@@ -6,11 +6,12 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { documentId, signerId, signature, token, fieldValues } = body as {
+  const { documentId, signerId, signature, stampData, token, fieldValues } = body as {
     documentId: string;
     signerId?: string;
     token?: string;
     signature: { type: string; text?: string; dataUrl?: string };
+    stampData?: { type: string; text?: string; dataUrl?: string };
     fieldValues?: Record<string, string>; // field_id -> value
   };
   if (!documentId || !signature) {
@@ -50,12 +51,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "すでに署名済みです。" }, { status: 400 });
   }
 
-  // OTP verification required for token-based access
-  if (token && !signer.otp_verified) {
-    return NextResponse.json({ error: "本人確認が完了していません。" }, { status: 403 });
-  }
-
-  const signatureData = JSON.stringify(signature);
+  const signatureData = JSON.stringify({ signature, stampData: stampData || null });
   const signedAt = new Date().toISOString();
 
   const { error: updateError } = await supabase

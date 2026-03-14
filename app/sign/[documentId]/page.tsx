@@ -42,20 +42,34 @@ export default async function SignPage({
     .single();
   if (!doc) notFound();
 
+  // Check if signing link has expired (30 days)
+  const isExpired = new Date(doc.created_at).getTime() + 30 * 24 * 60 * 60 * 1000 < Date.now();
+  if (isExpired) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
+          <h1 className="text-xl font-bold text-gray-900 mb-2">この署名リンクは期限切れです</h1>
+          <p className="text-sm text-gray-500">署名リンクの有効期限（30日間）が過ぎました。送信者にお問い合わせください。</p>
+        </div>
+      </div>
+    );
+  }
+
   const { data: signer } = await supabase
     .from("envelope_signers")
-    .select("id, email, name, company_name, signed_at, otp_verified")
+    .select("id, email, name, company_name, signed_at")
     .eq("document_id", documentId)
     .eq("id", resolvedSignerId)
     .single();
   if (!signer || signer.signed_at) notFound();
 
   // Get document owner name
-  const { data: owner } = await supabase
-    .from("profiles")
-    .select("display_name")
-    .eq("id", (await supabase.from("documents").select("user_id").eq("id", documentId).single()).data?.user_id ?? "")
-    .single();
+  let senderName = "送信者";
+  const { data: docOwner } = await supabase.from("documents").select("owner_id").eq("id", documentId).single();
+  if (docOwner) {
+    const { data: ownerUser } = await supabase.auth.admin.getUserById(docOwner.owner_id);
+    senderName = ownerUser?.user?.user_metadata?.company_name || ownerUser?.user?.user_metadata?.display_name || ownerUser?.user?.email || "送信者";
+  }
 
   const { data: urlData } = await supabase.storage
     .from("documents")
@@ -81,8 +95,7 @@ export default async function SignPage({
       signerName={signer.name || signer.email.split("@")[0]}
       signerEmail={signer.email}
       companyName={signer.company_name || undefined}
-      otpVerified={!!signer.otp_verified}
-      senderName={owner?.display_name || "送信者"}
+      senderName={senderName}
       createdAt={doc.created_at}
     />
   );

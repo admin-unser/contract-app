@@ -13,7 +13,7 @@ export async function GET() {
   // Get all documents for this user
   const { data: docs } = await supabase
     .from("documents")
-    .select("id, status, category, created_at")
+    .select("id, title, status, category, created_at, contract_start_date, contract_end_date, reminder_days_before, folder_id")
     .eq("owner_id", user.id);
 
   if (!docs) {
@@ -62,10 +62,43 @@ export async function GET() {
     value,
   }));
 
+  // Contract period alerts
+  const contractAlerts: { id: string; title: string; contract_end_date: string; days_remaining: number; level: "danger" | "warning" | "info" }[] = [];
+  docs.forEach((doc) => {
+    if (!doc.contract_end_date || doc.status !== "completed") return;
+    const endDate = new Date(doc.contract_end_date);
+    const daysRemaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const reminderDays = doc.reminder_days_before || 30;
+    if (daysRemaining <= reminderDays) {
+      contractAlerts.push({
+        id: doc.id,
+        title: doc.title,
+        contract_end_date: doc.contract_end_date,
+        days_remaining: daysRemaining,
+        level: daysRemaining <= 0 ? "danger" : daysRemaining <= 7 ? "warning" : "info",
+      });
+    }
+  });
+  contractAlerts.sort((a, b) => a.days_remaining - b.days_remaining);
+
+  // Contract timeline (upcoming expirations in next 12 months)
+  const contractTimeline = docs
+    .filter((d) => d.contract_end_date && d.status === "completed")
+    .map((d) => ({
+      id: d.id,
+      title: d.title,
+      contract_start_date: d.contract_start_date,
+      contract_end_date: d.contract_end_date,
+      days_remaining: Math.ceil((new Date(d.contract_end_date!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
+    }))
+    .sort((a, b) => a.days_remaining - b.days_remaining);
+
   return NextResponse.json({
     monthly: months.map(({ label, sent, completed }) => ({ label, sent, completed })),
     statusBreakdown,
     categoryBreakdown,
+    contractAlerts,
+    contractTimeline,
     totals: {
       total: docs.length,
       thisMonth: docs.filter((d) => {
