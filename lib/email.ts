@@ -50,12 +50,16 @@ export async function sendSigningRequest(params: SendSigningRequestParams) {
   const body = `
     <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
       <div style="text-align: center; margin-bottom: 24px;">
-        <div style="display: inline-flex; align-items: center; gap: 8px;">
-          <div style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
-            <span style="color: white; font-weight: bold; font-size: 14px;">U</span>
-          </div>
-          <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
-        </div>
+        <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+          <tr>
+            <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
+              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+            </td>
+            <td style="padding-left: 10px; vertical-align: middle;">
+              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+            </td>
+          </tr>
+        </table>
       </div>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">
         ${displayName} 様${signerCompany ? `（${signerCompany}）` : ""}
@@ -107,12 +111,16 @@ export async function sendCompletionNotification(params: SendCompletionNotificat
   const body = `
     <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
       <div style="text-align: center; margin-bottom: 24px;">
-        <div style="display: inline-flex; align-items: center; gap: 8px;">
-          <div style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
-            <span style="color: white; font-weight: bold; font-size: 14px;">U</span>
-          </div>
-          <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
-        </div>
+        <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+          <tr>
+            <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
+              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+            </td>
+            <td style="padding-left: 10px; vertical-align: middle;">
+              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+            </td>
+          </tr>
+        </table>
       </div>
       <div style="background: #ecfdf5; border-radius: 8px; padding: 16px; margin: 20px 0; text-align: center;">
         <p style="margin: 0; color: #059669; font-size: 15px; font-weight: 600;">全員の署名が完了しました</p>
@@ -158,12 +166,16 @@ export async function sendOtpEmail(params: SendOtpEmailParams) {
   const body = `
     <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
       <div style="text-align: center; margin-bottom: 24px;">
-        <div style="display: inline-flex; align-items: center; gap: 8px;">
-          <div style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
-            <span style="color: white; font-weight: bold; font-size: 14px;">U</span>
-          </div>
-          <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
-        </div>
+        <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+          <tr>
+            <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
+              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+            </td>
+            <td style="padding-left: 10px; vertical-align: middle;">
+              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+            </td>
+          </tr>
+        </table>
       </div>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">
         ${displayName} 様
