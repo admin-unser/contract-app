@@ -40,15 +40,35 @@ export async function GET(request: Request) {
       from: fromAddress,
       to,
       subject: `【テスト】UNSER Sign メール送信テスト ${new Date().toLocaleTimeString("ja-JP")}`,
-      html: `<div style="font-family: sans-serif; padding: 24px;">
-        <h2 style="color: #1a56db;">UNSER Sign メール送信テスト</h2>
-        <p>このメールが届いていれば、Resend経由のメール送信は正常に動作しています。</p>
-        <table style="border-collapse: collapse; margin-top: 16px;">
-          <tr><td style="padding: 4px 12px; color: #666;">送信先</td><td style="padding: 4px 12px;">${to}</td></tr>
-          <tr><td style="padding: 4px 12px; color: #666;">FROM</td><td style="padding: 4px 12px;">${fromAddress}</td></tr>
-          <tr><td style="padding: 4px 12px; color: #666;">時刻</td><td style="padding: 4px 12px;">${new Date().toISOString()}</td></tr>
-          <tr><td style="padding: 4px 12px; color: #666;">APIキー</td><td style="padding: 4px 12px;">${apiKey.substring(0, 12)}...</td></tr>
-        </table>
+      html: `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+            <tr>
+              <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
+                <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+              </td>
+              <td style="padding-left: 10px; vertical-align: middle;">
+                <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6;">テスト受信者 様</p>
+        <p style="color: #374151; font-size: 15px; line-height: 1.6;">
+          合同会社UNSER より、以下の文書への署名をお願いいたします。
+        </p>
+        <div style="background: #f3f4f6; border-radius: 8px; padding: 16px; margin: 20px 0;">
+          <p style="margin: 0; color: #6b7280; font-size: 13px;">文書名</p>
+          <p style="margin: 4px 0 0; color: #1f2937; font-size: 15px; font-weight: 600;">テスト契約書</p>
+        </div>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="#" style="display: inline-block; background: #1a56db; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
+            署名する
+          </a>
+        </div>
+        <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 32px;">
+          このメールは UNSER Sign から自動送信されています。
+        </p>
       </div>`,
     });
 
