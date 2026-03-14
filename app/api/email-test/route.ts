@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const testTo = to || user.email;
 
   const apiKey = process.env.RESEND_API_KEY;
-  const fromAddress = process.env.EMAIL_FROM ?? "UNSER Sign <onboarding@resend.dev>";
+  const fromAddress = (process.env.EMAIL_FROM ?? "UNSER Sign <noreply@sign.unser-inc.com>").trim();
 
   if (!apiKey) {
     return NextResponse.json({

@@ -8,7 +8,7 @@ function getResend() {
   return _resend;
 }
 
-const FROM_ADDRESS = (process.env.EMAIL_FROM ?? "UNSER Sign <onboarding@resend.dev>").trim();
+const FROM_ADDRESS = (process.env.EMAIL_FROM ?? "UNSER Sign <noreply@sign.unser-inc.com>").trim();
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 /** Dev-mode: log email to console instead of sending */

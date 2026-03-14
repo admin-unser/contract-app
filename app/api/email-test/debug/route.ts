@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   }
 
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const fromAddress = (process.env.EMAIL_FROM ?? "UNSER Sign <onboarding@resend.dev>").trim();
+  const fromAddress = (process.env.EMAIL_FROM ?? "UNSER Sign <noreply@sign.unser-inc.com>").trim();
   const to = searchParams.get("to") || "takumia@unser-inc.com";
 
   if (!apiKey) {
