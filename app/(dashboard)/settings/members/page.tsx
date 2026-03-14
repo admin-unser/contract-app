@@ -236,95 +236,116 @@ export default function MembersSettingsPage() {
         </form>
       </div>
 
-      {/* Members list */}
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-700">チームメンバー</h2>
-          <span className="text-xs text-gray-400">{members.length} 名</span>
+      {loading ? (
+        <div className="p-12 text-center">
+          <div className="inline-flex items-center gap-2 text-sm text-gray-400">
+            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+              <path d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" fill="currentColor" className="opacity-75" />
+            </svg>
+            読み込み中...
+          </div>
         </div>
-
-        {loading ? (
-          <div className="p-12 text-center">
-            <div className="inline-flex items-center gap-2 text-sm text-gray-400">
-              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-                <path d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" fill="currentColor" className="opacity-75" />
-              </svg>
-              読み込み中...
-            </div>
+      ) : members.length === 0 ? (
+        <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
+          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-gray-400">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
           </div>
-        ) : members.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-gray-400">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-500">メンバーがいません</p>
-            <p className="text-xs text-gray-400 mt-1">上のフォームからメンバーを招待してください</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {members.map((member) => (
-              <div
-                key={member.id}
-                className="px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
-              >
-                <div className="flex items-center gap-3.5">
-                  {/* Avatar */}
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${
-                      member.role === "admin"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {member.email.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-800">{member.email}</span>
-                      {member.role === "admin" && (
-                        <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-[10px] font-semibold">
-                          {roleLabel(member.role)}
-                        </span>
-                      )}
-                      {member.role === "member" && (
-                        <span className="rounded-full bg-gray-100 text-gray-600 px-2 py-0.5 text-[10px] font-semibold">
-                          {roleLabel(member.role)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      {statusBadge(member.status)}
-                      <span className="text-xs text-gray-400">
-                        {new Date(member.created_at).toLocaleDateString("ja-JP")}
-                      </span>
-                    </div>
-                  </div>
+          <p className="text-sm text-gray-500">メンバーがいません</p>
+          <p className="text-xs text-gray-400 mt-1">上のフォームからメンバーを招待してください</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Active members */}
+          {(() => {
+            const activeMembers = members.filter(m => m.status === "active");
+            if (activeMembers.length === 0) return null;
+            return (
+              <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    チームメンバー
+                  </h2>
+                  <span className="text-xs text-gray-400">{activeMembers.length} 名</span>
                 </div>
-
-                {/* Actions */}
-                {member.status === "pending" && (
-                  <button
-                    onClick={() => handleRemove(member)}
-                    className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                    title="招待を取り消す"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                  </button>
-                )}
+                <div className="divide-y divide-gray-100">
+                  {activeMembers.map((member) => (
+                    <div key={member.id} className="px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                      <div className="flex items-center gap-3.5">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold ${member.role === "admin" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
+                          {member.email.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-800">{member.email}</span>
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${member.role === "admin" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
+                              {roleLabel(member.role)}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-400">{new Date(member.created_at).toLocaleDateString("ja-JP")} 参加</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            );
+          })()}
+
+          {/* Pending invitations */}
+          {(() => {
+            const pendingMembers = members.filter(m => m.status === "pending");
+            if (pendingMembers.length === 0) return null;
+            return (
+              <div className="rounded-xl border border-amber-200 bg-white overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-amber-100 bg-amber-50 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-amber-700 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    招待中
+                  </h2>
+                  <span className="text-xs text-amber-500">{pendingMembers.length} 名</span>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {pendingMembers.map((member) => (
+                    <div key={member.id} className="px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold bg-amber-50 text-amber-600 border border-amber-200">
+                          {member.email.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-800">{member.email}</span>
+                            <span className="rounded-full bg-gray-100 text-gray-600 px-2 py-0.5 text-[10px] font-semibold">
+                              {roleLabel(member.role)}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-400">{new Date(member.created_at).toLocaleDateString("ja-JP")} 招待</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleRemove(member)}
+                        className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                        title="招待を取り消す"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </div>
   );
 }

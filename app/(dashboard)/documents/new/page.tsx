@@ -125,16 +125,16 @@ function NewDocumentWizard() {
     return () => window.removeEventListener("resize", updateWidth);
   }, [currentStep, documentId]);
 
-  // Generate file URL for preview
+  // Generate file URL for preview (local file only; template URLs are set directly)
   useEffect(() => {
     if (file) {
       const url = URL.createObjectURL(file);
       setFileUrl(url);
       return () => URL.revokeObjectURL(url);
-    } else {
+    } else if (!selectedTemplate) {
       setFileUrl(null);
     }
-  }, [file]);
+  }, [file, selectedTemplate]);
 
   // ── Step 1: File handling ──
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -153,11 +153,21 @@ function NewDocumentWizard() {
     }
   }, [title]);
 
-  function handleTemplateSelect(template: TemplateWithFolder) {
+  async function handleTemplateSelect(template: TemplateWithFolder) {
     setSelectedTemplate(template);
     setFile(null);
     if (!title) setTitle(template.name);
     setShowTemplateSelector(false);
+    // テンプレートPDFのプレビューURLを取得
+    try {
+      const res = await fetch(`/api/templates/${template.id}`);
+      if (res.ok) {
+        const { url } = await res.json();
+        setFileUrl(url);
+      }
+    } catch {
+      // プレビュー取得失敗しても続行可能
+    }
   }
 
   // ── Step 2 → Step 3 transition: Create document ──

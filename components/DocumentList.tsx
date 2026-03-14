@@ -180,6 +180,8 @@ export function DocumentList({
   const router = useRouter();
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [folders, setFolders] = useState<FolderItem[]>([]);
+  const [selectedDocs, setSelectedDocs] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch("/api/folders")
@@ -205,6 +207,79 @@ export function DocumentList({
     },
     [router]
   );
+
+  const handleDelete = useCallback(
+    async (docId: string, docTitle: string) => {
+      if (!confirm(`「${docTitle}」を削除しますか？この操作は取り消せません。`)) return;
+      setDeleting((prev) => new Set(prev).add(docId));
+      try {
+        const res = await fetch(`/api/documents/${docId}`, { method: "DELETE" });
+        if (!res.ok) {
+          const data = await res.json();
+          alert(`削除に失敗しました: ${data.error || "不明なエラー"}`);
+          return;
+        }
+        setSelectedDocs((prev) => {
+          const next = new Set(prev);
+          next.delete(docId);
+          return next;
+        });
+        router.refresh();
+      } finally {
+        setDeleting((prev) => {
+          const next = new Set(prev);
+          next.delete(docId);
+          return next;
+        });
+      }
+    },
+    [router]
+  );
+
+  const handleBulkDelete = useCallback(async () => {
+    if (selectedDocs.size === 0) return;
+    if (!confirm(`選択した${selectedDocs.size}件の文書を削除しますか？この操作は取り消せません。`)) return;
+    const ids = Array.from(selectedDocs);
+    setDeleting(new Set(ids));
+    try {
+      const results = await Promise.allSettled(
+        ids.map((id) => fetch(`/api/documents/${id}`, { method: "DELETE" }))
+      );
+      const failed = results.filter((r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok));
+      if (failed.length > 0) {
+        alert(`${failed.length}件の削除に失敗しました。`);
+      }
+      setSelectedDocs(new Set());
+      router.refresh();
+    } finally {
+      setDeleting(new Set());
+    }
+  }, [selectedDocs, router]);
+
+  const toggleSelect = useCallback((docId: string) => {
+    setSelectedDocs((prev) => {
+      const next = new Set(prev);
+      if (next.has(docId)) {
+        next.delete(docId);
+      } else {
+        next.add(docId);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    const filteredIds = (categoryFilter
+      ? documents.filter((d) => d.category === categoryFilter)
+      : documents
+    ).map((d) => d.id);
+    const allSelected = filteredIds.every((id) => selectedDocs.has(id));
+    if (allSelected) {
+      setSelectedDocs(new Set());
+    } else {
+      setSelectedDocs(new Set(filteredIds));
+    }
+  }, [documents, categoryFilter, selectedDocs]);
 
   const filtered = categoryFilter
     ? documents.filter((d) => d.category === categoryFilter)
@@ -277,11 +352,42 @@ export function DocumentList({
 
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-          <h2 className="text-sm font-semibold text-gray-700">
-            {filterStatus ? statusConfig[filterStatus]?.label ?? "文書" : "最近の文書"}
-            <span className="ml-2 text-gray-400 font-normal">({filtered.length}件)</span>
-          </h2>
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={filtered.length > 0 && filtered.every((d) => selectedDocs.has(d.id))}
+              onChange={toggleSelectAll}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4 cursor-pointer"
+              title="すべて選択"
+            />
+            <h2 className="text-sm font-semibold text-gray-700 flex-1">
+              {filterStatus ? statusConfig[filterStatus]?.label ?? "文書" : "最近の文書"}
+              <span className="ml-2 text-gray-400 font-normal">({filtered.length}件)</span>
+            </h2>
+          </div>
         </div>
+        {selectedDocs.size > 0 && (
+          <div className="px-4 py-2 border-b border-gray-100 bg-blue-50 flex items-center gap-3">
+            <span className="text-xs text-blue-700 font-medium">
+              {selectedDocs.size}件選択中
+            </span>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={deleting.size > 0}
+              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5">
+                <path d="M3 6h18" />
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+              一括削除 ({selectedDocs.size})
+            </button>
+          </div>
+        )}
         <ul className="divide-y divide-gray-100">
           {filtered.map((doc) => {
             const config = statusConfig[doc.status] ?? statusConfig.draft;
@@ -295,6 +401,17 @@ export function DocumentList({
             return (
               <li key={doc.id}>
                 <div className="flex items-center">
+                  <div className="pl-4 flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedDocs.has(doc.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleSelect(doc.id);
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4 cursor-pointer"
+                    />
+                  </div>
                   <Link
                     href={`/documents/${doc.id}`}
                     className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 transition-colors flex-1 min-w-0"
@@ -342,7 +459,7 @@ export function DocumentList({
                     </span>
                   </Link>
                   {folders.length > 0 && (
-                    <div className="pr-3">
+                    <div className="pr-1">
                       <FolderDropdown
                         documentId={doc.id}
                         currentFolderId={doc.folder_id}
@@ -351,6 +468,34 @@ export function DocumentList({
                       />
                     </div>
                   )}
+                  <div className="pr-3 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDelete(doc.id, doc.title);
+                      }}
+                      disabled={deleting.has(doc.id)}
+                      className="rounded-md p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors disabled:opacity-50"
+                      title="削除"
+                    >
+                      {deleting.has(doc.id) ? (
+                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+                          <path d="M3 6h18" />
+                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <path d="M10 11v6" />
+                          <path d="M14 11v6" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </li>
             );

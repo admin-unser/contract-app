@@ -43,7 +43,8 @@ export async function sendSigningRequest(params: SendSigningRequestParams) {
   } = params;
 
   const signingUrl = `${APP_URL}/sign/token/${signingToken}`;
-  const displayName = signerName || signerEmail;
+  // 宛先: 会社名 + お客様名
+  const displayName = [signerCompany, signerName].filter(Boolean).join(" ") || signerEmail;
 
   const subject = `【署名依頼】${documentTitle}`;
 
@@ -62,7 +63,7 @@ export async function sendSigningRequest(params: SendSigningRequestParams) {
         </table>
       </div>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">
-        ${displayName} 様${signerCompany ? `（${signerCompany}）` : ""}
+        ${displayName} 様
       </p>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">
         ${senderName} より、以下の文書への署名をお願いいたします。

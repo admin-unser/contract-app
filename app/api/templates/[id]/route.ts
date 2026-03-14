@@ -1,5 +1,34 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
+
+// テンプレートPDF URL取得
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data: template } = await supabase
+    .from("templates")
+    .select("file_path")
+    .eq("id", id)
+    .eq("owner_id", user.id)
+    .single();
+
+  if (!template) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const admin = createAdminClient();
+  const { data: urlData, error } = await admin.storage
+    .from("templates")
+    .createSignedUrl(template.file_path, 3600);
+
+  if (error || !urlData) return NextResponse.json({ error: "URL生成失敗" }, { status: 500 });
+  return NextResponse.json({ url: urlData.signedUrl });
+}
 
 // テンプレート削除
 export async function DELETE(

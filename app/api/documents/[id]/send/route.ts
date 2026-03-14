@@ -40,7 +40,11 @@ export async function POST(
     return NextResponse.json({ error: "全員署名済みです。" }, { status: 400 });
   }
 
-  const senderName = user.user_metadata?.company_name || user.user_metadata?.display_name || user.email || "送信者";
+  // 送信者: 企業名 + 担当者名（苗字のみ）
+  const companyName = user.user_metadata?.company_name || "";
+  const fullName = user.user_metadata?.display_name || user.user_metadata?.full_name || "";
+  const lastName = fullName.split(/[\s　]/)[0]; // 苗字のみ取得
+  const senderName = [companyName, lastName].filter(Boolean).join(" ") || user.email || "送信者";
   const results: { email: string; success: boolean; error?: string }[] = [];
 
   for (const signer of unsignedSigners) {
