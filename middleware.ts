@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  */
 
 const publicPaths = ['/login', '/signup'];
-const publicPrefixes = ['/sign/', '/verify/', '/api/otp/', '/api/verify/', '/api/sign'];
+const publicPrefixes = ['/sign/', '/verify/', '/api/otp/', '/api/verify/', '/api/sign', '/api/email-test/debug'];
 
 function isPublicPath(pathname: string): boolean {
   if (publicPrefixes.some((p) => pathname.startsWith(p))) return true;
