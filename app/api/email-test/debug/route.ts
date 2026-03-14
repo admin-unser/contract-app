@@ -11,8 +11,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const fromAddress = process.env.EMAIL_FROM ?? "UNSER Sign <onboarding@resend.dev>";
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const fromAddress = (process.env.EMAIL_FROM ?? "UNSER Sign <onboarding@resend.dev>").trim();
   const to = searchParams.get("to") || "takumia@unser-inc.com";
 
   if (!apiKey) {
@@ -27,7 +27,13 @@ export async function GET(request: Request) {
     const resend = new Resend(apiKey);
 
     // 1. ドメイン一覧を確認
-    const domains = await resend.domains.list();
+    let domainInfo: unknown = null;
+    try {
+      const domains = await resend.domains.list();
+      domainInfo = domains.data;
+    } catch (e) {
+      domainInfo = { error: String(e) };
+    }
 
     // 2. テストメール送信
     const result = await resend.emails.send({
@@ -55,11 +61,7 @@ export async function GET(request: Request) {
         to,
         apiKeyPrefix: apiKey.substring(0, 12) + "...",
       },
-      domains: domains.data?.map(d => ({
-        name: d.name,
-        status: d.status,
-        region: d.region,
-      })),
+      domains: domainInfo,
     });
   } catch (err) {
     return NextResponse.json({
