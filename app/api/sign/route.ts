@@ -14,9 +14,9 @@ export async function POST(request: Request) {
     stampData?: { type: string; text?: string; dataUrl?: string };
     fieldValues?: Record<string, string>; // field_id -> value
   };
-  if (!documentId || !signature) {
+  if (!documentId) {
     return NextResponse.json(
-      { error: "documentId, signature が必要です。" },
+      { error: "documentId が必要です。" },
       { status: 400 }
     );
   }

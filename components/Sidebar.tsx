@@ -136,6 +136,34 @@ export function Sidebar({ statusCounts }: SidebarProps) {
         </div>
 
         <Link
+          href="/settings/company"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ml-2 mb-0.5 ${
+            pathname.startsWith("/settings/company")
+              ? "bg-blue-50 text-blue-700"
+              : "text-gray-600 hover:bg-gray-50"
+          }`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          会社情報
+        </Link>
+
+        <Link
+          href="/settings/members"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ml-2 mb-0.5 ${
+            pathname.startsWith("/settings/members")
+              ? "bg-blue-50 text-blue-700"
+              : "text-gray-600 hover:bg-gray-50"
+          }`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
+          </svg>
+          メンバー管理
+        </Link>
+
+        <Link
           href="/settings/email-templates"
           className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ml-2 mb-0.5 ${
             pathname.startsWith("/settings/email-templates")
