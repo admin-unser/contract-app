@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendMemberInvitation } from "@/lib/email";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -109,6 +110,20 @@ export async function POST(request: Request) {
       );
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Send invitation email
+  try {
+    const inviterName = user.user_metadata?.full_name || user.email || "チームオーナー";
+    const inviterCompany = user.user_metadata?.company_name || user.email || "";
+    await sendMemberInvitation({
+      inviteeEmail: email,
+      inviterName,
+      inviterCompany,
+    });
+  } catch (emailError) {
+    console.error("[Members] Failed to send invitation email:", emailError);
+    // Don't fail the request if email fails - member was already added
   }
 
   return NextResponse.json(data);

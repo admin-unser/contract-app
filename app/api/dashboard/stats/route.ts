@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -10,11 +11,22 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Get all documents for this user
+  // Check if user is a team member of other owners
+  const admin = createAdminClient();
+  const { data: teamMemberships } = await admin
+    .from("team_members")
+    .select("owner_id")
+    .eq("email", user.email ?? "")
+    .eq("status", "active");
+
+  const teamOwnerIds = (teamMemberships ?? []).map((m: any) => m.owner_id);
+  const allOwnerIds = [user.id, ...teamOwnerIds];
+
+  // Get all documents for this user and their team owners
   const { data: docs } = await supabase
     .from("documents")
     .select("id, title, status, category, created_at, contract_start_date, contract_end_date, reminder_days_before, folder_id")
-    .eq("owner_id", user.id);
+    .in("owner_id", allOwnerIds);
 
   if (!docs) {
     return NextResponse.json({ monthly: [], statusBreakdown: [], categoryBreakdown: [] });

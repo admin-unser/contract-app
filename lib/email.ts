@@ -152,6 +152,59 @@ export async function sendCompletionNotification(params: SendCompletionNotificat
   return result;
 }
 
+interface SendMemberInvitationParams {
+  inviteeEmail: string;
+  inviterName: string;
+  inviterCompany: string;
+}
+
+export async function sendMemberInvitation(params: SendMemberInvitationParams) {
+  const { inviteeEmail, inviterName, inviterCompany } = params;
+  const loginUrl = `${APP_URL}/login`;
+
+  const subject = `【招待】UNSER Sign チームへの招待`;
+
+  const body = `
+    <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+          <tr>
+            <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
+              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+            </td>
+            <td style="padding-left: 10px; vertical-align: middle;">
+              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6;">
+        ${inviterName}（${inviterCompany}）があなたをUNSER Signのチームメンバーとして招待しました。
+      </p>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6;">
+        以下のボタンからログインまたは新規登録して、チームに参加してください。
+      </p>
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${loginUrl}" style="display: inline-block; background: #1a56db; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
+          ログイン / 新規登録
+        </a>
+      </div>
+      <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 32px;">
+        このメールは UNSER Sign から自動送信されています。
+      </p>
+    </div>
+  `;
+
+  if (IS_DEV_MODE) return devSendEmail({ to: inviteeEmail, subject, html: body });
+  const result = await getResend().emails.send({ from: FROM_ADDRESS, to: inviteeEmail, subject, html: body });
+  if (result.error) {
+    console.error("[Resend Error] sendMemberInvitation:", JSON.stringify(result.error));
+    throw new Error(result.error.message || "招待メール送信に失敗しました");
+  }
+  console.log("[Resend OK] Sent member invitation to", inviteeEmail, "id:", result.data?.id);
+  return result;
+}
+
 interface SendOtpEmailParams {
   signerEmail: string;
   signerName: string | null;

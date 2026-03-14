@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Document } from "@/lib/types";
 import { FileDropZone } from "@/components/FileDropZone";
 import { DocumentList } from "@/components/DocumentList";
@@ -17,10 +18,21 @@ export default async function DocumentsPage({
   } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // Check if user is a team member of other owners
+  const admin = createAdminClient();
+  const { data: teamMemberships } = await admin
+    .from("team_members")
+    .select("owner_id")
+    .eq("email", user.email ?? "")
+    .eq("status", "active");
+
+  const teamOwnerIds = (teamMemberships ?? []).map((m: any) => m.owner_id);
+  const allOwnerIds = [user.id, ...teamOwnerIds];
+
   let query = supabase
     .from("documents")
     .select("*, envelope_signers(id, email, signed_at, company_name)")
-    .eq("owner_id", user.id)
+    .in("owner_id", allOwnerIds)
     .order("created_at", { ascending: false });
 
   if (filterStatus && ["draft", "sent", "completed"].includes(filterStatus)) {
@@ -47,7 +59,7 @@ export default async function DocumentsPage({
   const { data: allDocs } = await supabase
     .from("documents")
     .select("status")
-    .eq("owner_id", user.id);
+    .in("owner_id", allOwnerIds);
   allDocs?.forEach((d) => {
     if (d.status in statusCounts) {
       statusCounts[d.status as keyof typeof statusCounts]++;
