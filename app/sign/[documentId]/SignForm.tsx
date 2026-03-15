@@ -367,11 +367,11 @@ export function SignForm({
       {/* ============================================================ */}
       {/*  MAIN LAYOUT: sidebar + PDF                                  */}
       {/* ============================================================ */}
-      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1 overflow-auto md:overflow-hidden">
         {/* ---------------------------------------------------------- */}
         {/*  LEFT SIDEBAR - Checklist                                   */}
         {/* ---------------------------------------------------------- */}
-        <div className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0 max-h-[40vh] md:max-h-none overflow-y-auto md:overflow-y-visible">
+        <div className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col shrink-0 md:max-h-none md:overflow-y-auto">
           <div className="p-4 border-b border-gray-100">
             <div className="text-sm font-bold text-gray-900">文書1 (1/1)</div>
             <div className="mt-1.5 flex items-center gap-1.5">
@@ -464,8 +464,8 @@ export function SignForm({
             })}
           </div>
 
-          {/* Bottom bar with progress */}
-          <div className="p-4 border-t border-gray-200 bg-gradient-to-t from-gray-50 to-white">
+          {/* Bottom bar with progress - hidden on mobile, shown in floating bar instead */}
+          <div className="hidden md:block p-4 border-t border-gray-200 bg-gradient-to-t from-gray-50 to-white">
             {/* Mini progress bar */}
             <div className="flex items-center gap-2 mb-3">
               <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -587,6 +587,38 @@ export function SignForm({
               )}
             </div>
           )}
+
+          {/* Mobile submit button */}
+          <div className="md:hidden mt-4 pb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex-1 h-2 bg-gray-300 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500 ease-out"
+                  style={{
+                    width: `${progressPercent}%`,
+                    background: progressPercent === 100
+                      ? 'linear-gradient(90deg, #22c55e, #16a34a)'
+                      : 'linear-gradient(90deg, #3b82f6, #6366f1)',
+                  }}
+                />
+              </div>
+              <span className="text-xs font-bold tabular-nums text-gray-600">
+                {completedCount}/{requiredCount}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading || !allFieldsComplete}
+              className={`w-full py-4 rounded-xl font-bold text-base transition-all duration-200 ${
+                allFieldsComplete
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              {loading ? "送信中..." : "完了する"}
+            </button>
+          </div>
         </div>
       </div>
 

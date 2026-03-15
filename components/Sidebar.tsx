@@ -11,13 +11,20 @@ interface SidebarProps {
     sent: number;
     completed: number;
   };
+  mobileOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function Sidebar({ statusCounts }: SidebarProps) {
+export function Sidebar({ statusCounts, mobileOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed top-[var(--header-height)] left-0 bottom-0 w-[var(--sidebar-width)] bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
+    <>
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={onClose} />
+      )}
+      <aside className={`fixed top-[var(--header-height)] left-0 bottom-0 w-[var(--sidebar-width)] bg-white border-r border-gray-200 flex flex-col overflow-y-auto z-50 transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}>
       {/* Main action button */}
       <div className="p-4">
         <Link
@@ -193,5 +200,6 @@ export function Sidebar({ statusCounts }: SidebarProps) {
         </form>
       </div>
     </aside>
+    </>
   );
 }
