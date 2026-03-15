@@ -8,7 +8,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * - Request size validation
  */
 
-const publicPaths = ['/login', '/signup'];
+const publicPaths = ['/login', '/signup', '/terms', '/privacy', '/legal', '/contact'];
 const publicPrefixes = ['/sign/', '/verify/', '/api/otp/', '/api/verify/', '/api/sign', '/api/email-test/debug', '/api/billing/webhook', '/api/cron/'];
 
 // In-memory rate limit store (per serverless instance)
