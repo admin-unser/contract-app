@@ -322,7 +322,7 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
       label: "スタイルで作成",
       sublabel: "フォントを選んで署名",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path d="M4 7V4h16v3" /><path d="M9 20h6" /><path d="M12 4v16" />
         </svg>
       ),
@@ -332,8 +332,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
       label: "手書きで描く",
       sublabel: "ペンで自由に署名",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 1 1 3.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
       ),
     },
@@ -342,8 +342,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
       label: "印鑑を作成",
       sublabel: "印影を自動生成",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-          <circle cx="12" cy="10" r="7" /><path d="M12 3v0" /><path d="M5 21h14" /><path d="M5 21v-3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <circle cx="12" cy="10" r="6" /><path d="M8 20h8" /><path d="M10 16h4v4H10z" />
         </svg>
       ),
     },
@@ -367,8 +367,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
               onClick={onCancel}
               className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
           )}
@@ -439,8 +439,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
                     </span>
                     {selectedFont === i && (
                       <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-3 h-3">
-                          <polyline points="20 6 9 17 4 12" />
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                          <path d="M20 6L9 17l-5-5" />
                         </svg>
                       </div>
                     )}
@@ -477,8 +477,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                    <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 1 1 3.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                   ペン
                 </button>
@@ -491,9 +491,9 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                    <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
-                    <path d="M22 21H7" /><path d="m5 11 9 9" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                    <path d="M20 20H7L3 16c-.8-.8-.8-2 0-2.8L14.2 2c.8-.8 2-.8 2.8 0l4.2 4.2c.8.8.8 2 0 2.8L12 18" />
+                    <path d="M6 14l4 4" />
                   </svg>
                   消しゴム
                 </button>
@@ -555,8 +555,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
                 className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-25 transition-all"
                 title="元に戻す (Ctrl+Z)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                  <path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                  <path d="M3 10h10a5 5 0 0 1 0 10H5" /><path d="M7 14L3 10l4-4" />
                 </svg>
               </button>
               <button
@@ -566,8 +566,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
                 className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-25 transition-all"
                 title="すべてクリア"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                  <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                  <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M10 11v6M14 11v6" />
                 </svg>
               </button>
             </div>
@@ -597,8 +597,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
               {/* Placeholder */}
               {!hasDrawn && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-8 h-8 text-gray-200">
-                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-gray-200">
+                    <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 1 1 3.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                   <span className="text-gray-300 text-sm font-medium">ここに署名を描いてください</span>
                 </div>
@@ -696,8 +696,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
                       title={c.name}
                     >
                       {stampColor === i && (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" className="w-4 h-4">
-                          <polyline points="20 6 9 17 4 12" />
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                          <path d="M20 6L9 17l-5-5" />
                         </svg>
                       )}
                     </button>
@@ -736,8 +736,8 @@ export function SignatureGenerator({ signerName, companyName, onComplete, onCanc
           disabled={!isValid}
           className="relative rounded-xl bg-blue-600 px-7 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 active:bg-blue-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2 flex-shrink-0"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-            <polyline points="20 6 9 17 4 12" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <path d="M20 6L9 17l-5-5" />
           </svg>
           署名を確定
         </button>
