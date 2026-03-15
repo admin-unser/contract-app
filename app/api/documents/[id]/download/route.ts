@@ -23,10 +23,10 @@ async function loadJapaneseFont(): Promise<ArrayBuffer> {
     throw new Error(`Google Fonts CSS fetch failed: ${cssRes.status}`);
   }
   const cssText = await cssRes.text();
-  // Extract TTF URL from CSS
-  const urlMatch = cssText.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+\.ttf)\)/);
+  // Extract font URL from CSS (old user-agent returns TTF/OTF format, URL may not have extension)
+  const urlMatch = cssText.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/);
   if (!urlMatch) {
-    throw new Error("Could not extract TTF URL from Google Fonts CSS");
+    throw new Error("Could not extract font URL from Google Fonts CSS");
   }
   const ttfUrl = urlMatch[1];
   const fontRes = await fetch(ttfUrl);
