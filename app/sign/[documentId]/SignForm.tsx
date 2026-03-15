@@ -286,7 +286,7 @@ export function SignForm({
               U
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-bold text-gray-900 truncate max-w-[280px] leading-tight">{documentTitle}</span>
+              <span className="text-sm font-bold text-gray-900 truncate max-w-[180px] md:max-w-[280px] leading-tight">{documentTitle}</span>
               <span className="text-[10px] text-gray-400 font-medium">UNSER Sign</span>
             </div>
           </div>
@@ -367,11 +367,11 @@ export function SignForm({
       {/* ============================================================ */}
       {/*  MAIN LAYOUT: sidebar + PDF                                  */}
       {/* ============================================================ */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* ---------------------------------------------------------- */}
         {/*  LEFT SIDEBAR - Checklist                                   */}
         {/* ---------------------------------------------------------- */}
-        <div className="w-72 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+        <div className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0 max-h-[40vh] md:max-h-none overflow-y-auto md:overflow-y-visible">
           <div className="p-4 border-b border-gray-100">
             <div className="text-sm font-bold text-gray-900">文書1 (1/1)</div>
             <div className="mt-1.5 flex items-center gap-1.5">
@@ -509,7 +509,7 @@ export function SignForm({
         {/* ---------------------------------------------------------- */}
         {/*  PDF VIEWER AREA                                            */}
         {/* ---------------------------------------------------------- */}
-        <div className="flex-1 overflow-y-auto bg-gray-200 p-6" style={{ scrollBehavior: 'smooth' }}>
+        <div className="flex-1 overflow-y-auto bg-gray-200 p-3 md:p-6" style={{ scrollBehavior: 'smooth' }}>
           {error && (
             <div className="mb-4 mx-auto max-w-3xl rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-4 flex items-center gap-3 shadow-sm">
               <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
@@ -598,11 +598,11 @@ export function SignForm({
         if (!f || ["signature", "stamp", "checkbox"].includes(f.field_type)) return null;
         const config = FIELD_TYPE_CONFIG[f.field_type];
         return (
-          <div className="fixed bottom-0 left-72 right-0 z-40">
+          <div className="fixed bottom-0 left-0 md:left-72 right-0 z-40">
             <div className="bg-white border-t-2 border-blue-500 shadow-2xl">
-              <div className="max-w-2xl mx-auto px-6 py-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-2xl flex-shrink-0">
+              <div className="max-w-2xl mx-auto px-4 md:px-6 py-4 md:py-5">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-xl md:text-2xl flex-shrink-0">
                     {config.icon}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -614,7 +614,7 @@ export function SignForm({
                       value={fieldValues[f.id] || ""}
                       onChange={(e) => updateFieldValue(f.id, e.target.value)}
                       autoFocus
-                      className="w-full text-lg font-medium text-gray-900 border-0 border-b-2 border-gray-200 focus:border-blue-500 bg-transparent py-2 outline-none transition-colors"
+                      className="w-full text-base md:text-lg font-medium text-gray-900 border-0 border-b-2 border-gray-200 focus:border-blue-500 bg-transparent py-2 outline-none transition-colors"
                       style={{ boxShadow: 'none' }}
                       placeholder={
                         f.field_type === "name" ? signerName || "お名前を入力" :
@@ -628,7 +628,7 @@ export function SignForm({
                   <button
                     type="button"
                     onClick={() => setActiveFieldId(null)}
-                    className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95 flex-shrink-0"
+                    className="px-5 md:px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95 flex-shrink-0"
                   >
                     確定
                   </button>
