@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
+import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 
 export default async function DashboardLayout({
   children,
@@ -40,6 +41,7 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
+      <OnboardingTutorial />
     </div>
   );
 }
