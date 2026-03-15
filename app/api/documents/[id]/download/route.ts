@@ -3,42 +3,17 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
-// Google Fonts CSS2 API: use non-woff2 user-agent to get TTF URL
-// pdf-lib only supports OTF/TTF (not WOFF2)
-const GOOGLE_FONTS_CSS_URL =
-  "https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap";
+// Load Japanese TTF font bundled in the project (pdf-lib requires TTF/OTF, not WOFF2)
+let fontCache: Buffer | null = null;
 
-let fontCache: ArrayBuffer | null = null;
-
-async function loadJapaneseFont(): Promise<ArrayBuffer> {
+async function loadJapaneseFont(): Promise<Buffer> {
   if (fontCache) return fontCache;
-  // Request with old user-agent to get TTF URLs instead of WOFF2
-  const cssRes = await fetch(GOOGLE_FONTS_CSS_URL, {
-    headers: {
-      "User-Agent": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)",
-    },
-  });
-  if (!cssRes.ok) {
-    throw new Error(`Google Fonts CSS fetch failed: ${cssRes.status}`);
-  }
-  const cssText = await cssRes.text();
-  // Extract font URL from CSS (old user-agent returns TTF/OTF format, URL may not have extension)
-  const urlMatch = cssText.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/);
-  if (!urlMatch) {
-    throw new Error("Could not extract font URL from Google Fonts CSS");
-  }
-  const ttfUrl = urlMatch[1];
-  const fontRes = await fetch(ttfUrl);
-  if (!fontRes.ok) {
-    throw new Error(`Font TTF fetch failed: ${fontRes.status}`);
-  }
-  const buf = await fontRes.arrayBuffer();
-  if (buf.byteLength < 10000) {
-    throw new Error(`Font too small (${buf.byteLength} bytes)`);
-  }
-  fontCache = buf;
-  return buf;
+  const fontPath = join(process.cwd(), "lib", "fonts", "NotoSansJP-Regular.ttf");
+  fontCache = await readFile(fontPath);
+  return fontCache;
 }
 
 // Embed a PNG dataUrl image into a field area on a PDF page
