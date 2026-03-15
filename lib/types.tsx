@@ -185,6 +185,79 @@ export interface OtpToken {
   created_at: string;
 }
 
+// ============================================================
+// SaaS Billing Types
+// ============================================================
+
+export type PlanId = "free" | "starter" | "business" | "enterprise";
+
+export interface Plan {
+  id: PlanId;
+  name: string;
+  price_monthly: number;
+  max_documents_per_month: number | null;
+  max_users: number | null;
+  max_templates: number | null;
+  features: PlanFeatures;
+  stripe_price_id: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface PlanFeatures {
+  api: boolean;
+  audit_log: boolean;
+  ai_review: boolean;
+  custom_email: boolean;
+  webhook?: boolean;
+  sso?: boolean;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string | null;
+  owner_id: string;
+  is_internal: boolean;
+  stripe_customer_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrganizationMember {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: "owner" | "admin" | "member";
+  created_at: string;
+}
+
+export type SubscriptionStatus = "active" | "past_due" | "canceled" | "trialing" | "paused";
+
+export interface Subscription {
+  id: string;
+  organization_id: string;
+  plan_id: PlanId;
+  status: SubscriptionStatus;
+  stripe_subscription_id: string | null;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at: string | null;
+  canceled_at: string | null;
+  trial_end: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UsageRecord {
+  id: string;
+  organization_id: string;
+  period_start: string;
+  period_end: string;
+  documents_sent: number;
+  documents_completed: number;
+}
+
 // 監査ログ
 export type AuditAction =
   | "document_created"

@@ -183,6 +183,20 @@ export function Sidebar({ statusCounts, mobileOpen, onClose }: SidebarProps) {
           </svg>
           メールテンプレート
         </Link>
+
+        <Link
+          href="/settings/billing"
+          className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ml-2 mb-0.5 ${
+            pathname.startsWith("/settings/billing")
+              ? "bg-blue-50 text-blue-700"
+              : "text-gray-600 hover:bg-gray-50"
+          }`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+            <rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          プラン・お支払い
+        </Link>
       </nav>
 
       {/* Bottom section: Logout */}

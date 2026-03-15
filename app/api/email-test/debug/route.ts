@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   }
 
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const fromAddress = (process.env.EMAIL_FROM ?? "UNSER Sign <noreply@sign.unser-inc.com>").trim();
+  const fromAddress = (process.env.EMAIL_FROM ?? "MUSUBI sign <noreply@sign.unser-inc.com>").trim();
   const to = searchParams.get("to") || "takumia@unser-inc.com";
 
   if (!apiKey) {
@@ -39,16 +39,16 @@ export async function GET(request: Request) {
     const result = await resend.emails.send({
       from: fromAddress,
       to,
-      subject: `【テスト】UNSER Sign メール送信テスト ${new Date().toLocaleTimeString("ja-JP")}`,
+      subject: `【テスト】MUSUBI sign メール送信テスト ${new Date().toLocaleTimeString("ja-JP")}`,
       html: `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
         <div style="text-align: center; margin-bottom: 24px;">
           <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
             <tr>
-              <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
-                <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+              <td style="width: 32px; height: 32px; background: linear-gradient(135deg, #1a365d, #312e81); border-radius: 6px; text-align: center; vertical-align: middle;">
+                <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">M</span>
               </td>
               <td style="padding-left: 10px; vertical-align: middle;">
-                <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+                <span style="font-size: 18px; font-weight: bold; color: #1f2937;">MUSUBI sign</span>
               </td>
             </tr>
           </table>
@@ -62,12 +62,12 @@ export async function GET(request: Request) {
           <p style="margin: 4px 0 0; color: #1f2937; font-size: 15px; font-weight: 600;">テスト契約書</p>
         </div>
         <div style="text-align: center; margin: 32px 0;">
-          <a href="#" style="display: inline-block; background: #1a56db; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
+          <a href="#" style="display: inline-block; background: linear-gradient(135deg, #1a365d, #312e81); color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
             署名する
           </a>
         </div>
         <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 32px;">
-          このメールは UNSER Sign から自動送信されています。
+          このメールは MUSUBI sign から自動送信されています。
         </p>
       </div>`,
     });

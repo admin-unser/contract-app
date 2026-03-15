@@ -8,7 +8,7 @@ function getResend() {
   return _resend;
 }
 
-const FROM_ADDRESS = (process.env.EMAIL_FROM ?? "UNSER Sign <noreply@sign.unser-inc.com>").trim();
+const FROM_ADDRESS = (process.env.EMAIL_FROM ?? "MUSUBI sign <noreply@sign.unser-inc.com>").trim();
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 /** Dev-mode: log email to console instead of sending */
@@ -53,11 +53,11 @@ export async function sendSigningRequest(params: SendSigningRequestParams) {
       <div style="text-align: center; margin-bottom: 24px;">
         <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
           <tr>
-            <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
-              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+            <td style="width: 32px; height: 32px; background: linear-gradient(135deg, #1a365d, #312e81); border-radius: 6px; text-align: center; vertical-align: middle;">
+              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">M</span>
             </td>
             <td style="padding-left: 10px; vertical-align: middle;">
-              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">MUSUBI sign</span>
             </td>
           </tr>
         </table>
@@ -78,12 +78,12 @@ export async function sendSigningRequest(params: SendSigningRequestParams) {
         <p style="margin: 4px 0 0; color: #374151; font-size: 14px; white-space: pre-wrap;">${customMessage}</p>
       </div>` : ""}
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${signingUrl}" style="display: inline-block; background: #1a56db; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
+        <a href="${signingUrl}" style="display: inline-block; background: linear-gradient(135deg, #1a365d, #312e81); color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
           署名する
         </a>
       </div>
       <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 32px;">
-        このメールは UNSER Sign から自動送信されています。
+        このメールは MUSUBI sign から自動送信されています。
       </p>
     </div>
   `;
@@ -114,11 +114,11 @@ export async function sendCompletionNotification(params: SendCompletionNotificat
       <div style="text-align: center; margin-bottom: 24px;">
         <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
           <tr>
-            <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
-              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+            <td style="width: 32px; height: 32px; background: linear-gradient(135deg, #1a365d, #312e81); border-radius: 6px; text-align: center; vertical-align: middle;">
+              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">M</span>
             </td>
             <td style="padding-left: 10px; vertical-align: middle;">
-              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">MUSUBI sign</span>
             </td>
           </tr>
         </table>
@@ -132,12 +132,12 @@ export async function sendCompletionNotification(params: SendCompletionNotificat
         <p style="margin: 8px 0 0; color: #6b7280; font-size: 13px;">署名者数: ${signerCount}名</p>
       </div>
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${documentUrl}" style="display: inline-block; background: #1a56db; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
+        <a href="${documentUrl}" style="display: inline-block; background: linear-gradient(135deg, #1a365d, #312e81); color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
           文書を確認する
         </a>
       </div>
       <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 32px;">
-        このメールは UNSER Sign から自動送信されています。
+        このメールは MUSUBI sign から自動送信されています。
       </p>
     </div>
   `;
@@ -163,35 +163,35 @@ export async function sendMemberInvitation(params: SendMemberInvitationParams) {
   const { inviteeEmail, inviterName, inviterCompany } = params;
   const loginUrl = `${APP_URL}/login`;
 
-  const subject = `【招待】UNSER Sign チームへの招待`;
+  const subject = `【招待】MUSUBI sign チームへの招待`;
 
   const body = `
     <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
       <div style="text-align: center; margin-bottom: 24px;">
         <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
           <tr>
-            <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
-              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+            <td style="width: 32px; height: 32px; background: linear-gradient(135deg, #1a365d, #312e81); border-radius: 6px; text-align: center; vertical-align: middle;">
+              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">M</span>
             </td>
             <td style="padding-left: 10px; vertical-align: middle;">
-              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">MUSUBI sign</span>
             </td>
           </tr>
         </table>
       </div>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">
-        ${inviterName}（${inviterCompany}）があなたをUNSER Signのチームメンバーとして招待しました。
+        ${inviterName}（${inviterCompany}）があなたをMUSUBI signのチームメンバーとして招待しました。
       </p>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">
         以下のボタンからログインまたは新規登録して、チームに参加してください。
       </p>
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${loginUrl}" style="display: inline-block; background: #1a56db; color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
+        <a href="${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, #1a365d, #312e81); color: white; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600;">
           ログイン / 新規登録
         </a>
       </div>
       <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 32px;">
-        このメールは UNSER Sign から自動送信されています。
+        このメールは MUSUBI sign から自動送信されています。
       </p>
     </div>
   `;
@@ -222,11 +222,11 @@ export async function sendOtpEmail(params: SendOtpEmailParams) {
       <div style="text-align: center; margin-bottom: 24px;">
         <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
           <tr>
-            <td style="width: 32px; height: 32px; background: #1a56db; border-radius: 6px; text-align: center; vertical-align: middle;">
-              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">U</span>
+            <td style="width: 32px; height: 32px; background: linear-gradient(135deg, #1a365d, #312e81); border-radius: 6px; text-align: center; vertical-align: middle;">
+              <span style="color: white; font-weight: bold; font-size: 14px; line-height: 32px;">M</span>
             </td>
             <td style="padding-left: 10px; vertical-align: middle;">
-              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">UNSER Sign</span>
+              <span style="font-size: 18px; font-weight: bold; color: #1f2937;">MUSUBI sign</span>
             </td>
           </tr>
         </table>
@@ -245,12 +245,12 @@ export async function sendOtpEmail(params: SendOtpEmailParams) {
         このコードは10分間有効です。心当たりのない場合はこのメールを無視してください。
       </p>
       <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 32px;">
-        このメールは UNSER Sign から自動送信されています。
+        このメールは MUSUBI sign から自動送信されています。
       </p>
     </div>
   `;
 
-  const subject = `【認証コード】UNSER Sign: ${code}`;
+  const subject = `【認証コード】MUSUBI sign: ${code}`;
   if (IS_DEV_MODE) {
     console.log(`\n🔑 [DEV OTP] Code for ${signerEmail}: ${code}\n`);
     return devSendEmail({ to: signerEmail, subject, html: body });

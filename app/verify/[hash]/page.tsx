@@ -48,10 +48,10 @@ export default function VerifyPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">U</span>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center">
+              <span className="text-white font-bold text-sm">M</span>
             </div>
-            <span className="text-lg font-bold text-gray-800">UNSER Sign</span>
+            <span className="text-lg font-bold text-gray-800">MUSUBI <span className="font-normal text-sm text-gray-500">sign</span></span>
           </div>
           <p className="text-sm text-gray-500 mt-1">文書検証</p>
         </div>
@@ -154,7 +154,7 @@ export default function VerifyPage() {
         </div>
 
         <p className="text-xs text-gray-400 text-center mt-6">
-          UNSER Sign 電子署名検証システム
+          MUSUBI sign 電子署名検証システム
         </p>
       </div>
     </div>

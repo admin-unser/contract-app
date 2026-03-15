@@ -282,12 +282,12 @@ export function SignForm({
         <div className="px-5 py-3 flex items-center justify-between">
           {/* Left: logo + title */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-blue-600/20">
-              U
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-indigo-900/20">
+              M
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-bold text-gray-900 truncate max-w-[180px] md:max-w-[280px] leading-tight">{documentTitle}</span>
-              <span className="text-[10px] text-gray-400 font-medium">UNSER Sign</span>
+              <span className="text-[10px] text-gray-400 font-medium">MUSUBI sign</span>
             </div>
           </div>
 
@@ -332,7 +332,7 @@ export function SignForm({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
             <div className="px-6 pt-6 pb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-900">UNSER Signの使い方</h2>
+              <h2 className="text-lg font-bold text-gray-900">MUSUBI signの使い方</h2>
               <button onClick={() => setShowGuide(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
             </div>
             <div className="px-6 pb-6 space-y-5">

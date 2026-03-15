@@ -36,17 +36,13 @@ function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo area */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
-                <path d="M9 15l2 2 4-4" />
-              </svg>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">M</span>
             </div>
-            <span className="text-2xl font-bold text-gray-800">UNSER Sign</span>
+            <span className="text-2xl font-bold text-gray-800 tracking-tight">MUSUBI <span className="font-normal text-lg text-gray-500">sign</span></span>
           </div>
-          <p className="text-sm text-gray-500">電子契約・署名管理システム</p>
+          <p className="text-sm text-gray-500">契約を、結ぶ。</p>
         </div>
 
         {/* Login card */}
@@ -103,7 +99,7 @@ function LoginForm() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-4">
-          社内限定・登録制
+          無料プランあり
         </p>
       </div>
     </div>

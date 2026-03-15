@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const testTo = to || user.email;
 
   const apiKey = process.env.RESEND_API_KEY;
-  const fromAddress = (process.env.EMAIL_FROM ?? "UNSER Sign <noreply@sign.unser-inc.com>").trim();
+  const fromAddress = (process.env.EMAIL_FROM ?? "MUSUBI sign <noreply@sign.unser-inc.com>").trim();
 
   if (!apiKey) {
     return NextResponse.json({
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const result = await resend.emails.send({
       from: fromAddress,
       to: testTo,
-      subject: "【テスト】UNSER Sign メール送信テスト",
+      subject: "【テスト】MUSUBI sign メール送信テスト",
       html: `<div style="font-family: sans-serif; padding: 24px;">
         <h2>メール送信テスト成功</h2>
         <p>このメールが届いていれば、Resend経由のメール送信は正常に動作しています。</p>

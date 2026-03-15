@@ -6,6 +6,7 @@ import { CopySignLinkButton } from "@/components/CopySignLinkButton";
 import { DownloadButton } from "@/components/DownloadButton";
 import { SendEmailButton } from "@/components/SendEmailButton";
 import { VerificationBadge } from "@/components/VerificationBadge";
+import { AiRiskReview } from "@/components/AiRiskReview";
 
 const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
   draft: { label: "下書き", color: "text-gray-600", bgColor: "bg-gray-100" },
@@ -188,6 +189,11 @@ export default async function DocumentDetailPage({
             />
           </div>
         )}
+      </div>
+
+      {/* AI Risk Review */}
+      <div className="mt-6">
+        <AiRiskReview documentId={document.id} />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { TemplateWithFolder, TemplateFolder } from "@/lib/types";
+import { PRESET_TEMPLATES, PRESET_CATEGORIES } from "@/lib/preset-templates";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<TemplateWithFolder[]>([]);
@@ -11,6 +12,8 @@ export default function TemplatesPage() {
   const [newFolderName, setNewFolderName] = useState("");
   const [showFolderInput, setShowFolderInput] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showPresets, setShowPresets] = useState(true);
+  const [presetCategory, setPresetCategory] = useState<string | null>(null);
 
   async function loadData() {
     setLoading(true);
@@ -216,6 +219,91 @@ export default function TemplatesPage() {
               ))}
             </div>
           )}
+
+          {/* Preset Templates Section */}
+          <div className="mt-8">
+            <button
+              onClick={() => setShowPresets(!showPresets)}
+              className="flex items-center gap-2 mb-4"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-4 h-4 text-gray-400 transition-transform ${showPresets ? "rotate-90" : ""}`}>
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+              <h2 className="text-lg font-bold text-gray-800">プリセットテンプレート</h2>
+              <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{PRESET_TEMPLATES.length}種類</span>
+            </button>
+
+            {showPresets && (
+              <>
+                {/* Category filter */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <button
+                    onClick={() => setPresetCategory(null)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      presetCategory === null ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    すべて
+                  </button>
+                  {PRESET_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setPresetCategory(cat.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        presetCategory === cat.id ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Preset grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {PRESET_TEMPLATES
+                    .filter((t) => !presetCategory || t.category === presetCategory)
+                    .map((preset) => {
+                      const cat = PRESET_CATEGORIES.find((c) => c.id === preset.category);
+                      return (
+                        <div
+                          key={preset.id}
+                          className="rounded-xl border border-gray-200 bg-white p-5 hover:border-indigo-200 hover:shadow-sm transition-all group"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-100 transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-indigo-500">
+                                <path d={preset.icon} />
+                              </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-bold text-gray-800">{preset.name}</h3>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">{cat?.name}</span>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">{preset.description}</p>
+                              <div className="flex items-center gap-1.5 mt-2 text-[10px] text-gray-400">
+                                <span>{preset.fields.length}フィールド</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-gray-100">
+                            <Link
+                              href={`/documents/new?preset=${preset.id}`}
+                              className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-medium hover:bg-indigo-100 transition-colors"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                              </svg>
+                              このテンプレートで契約作成
+                            </Link>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

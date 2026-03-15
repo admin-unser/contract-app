@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "UNSER Sign | 電子契約・署名管理",
-  description: "電子契約・署名管理システム",
+  title: "MUSUBI sign | 電子契約・署名プラットフォーム",
+  description: "MUSUBI sign - 契約を、結ぶ。電子契約・署名プラットフォーム",
 };
 
 export default function RootLayout({

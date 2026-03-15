@@ -35,15 +35,11 @@ export function Header({ email, onMenuToggle }: { email: string; onMenuToggle?: 
           </button>
         )}
         <Link href="/documents" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-              <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
-              <path d="M9 15l2 2 4-4" />
-            </svg>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+            <span className="text-white font-bold text-sm">M</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-bold text-gray-800 leading-tight">UNSER Sign</span>
+            <span className="text-base font-bold text-gray-800 leading-tight">MUSUBI <span className="font-normal text-sm text-gray-400">sign</span></span>
             <span className="text-[10px] text-gray-400 leading-tight">電子契約プラットフォーム</span>
           </div>
         </Link>

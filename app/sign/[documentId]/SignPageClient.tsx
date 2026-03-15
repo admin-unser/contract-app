@@ -50,10 +50,10 @@ export function SignPageClient({
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                U
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                M
               </div>
-              <span className="text-xl font-bold text-gray-800">UNSER Sign</span>
+              <span className="text-xl font-bold text-gray-800">MUSUBI <span className="font-normal text-base text-gray-500">sign</span></span>
             </div>
           </div>
 
@@ -92,7 +92,7 @@ export function SignPageClient({
           </div>
 
           <p className="text-center text-xs text-gray-400 mt-6">
-            Powered by UNSER Sign
+            Powered by MUSUBI sign
           </p>
         </div>
       </div>

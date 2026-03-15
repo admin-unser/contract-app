@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { sendSigningRequest } from "@/lib/email";
+import { getOrCreateOrganization, canSendDocument } from "@/lib/organization";
 import { NextResponse } from "next/server";
 
 // 署名依頼メールを一括送信
@@ -13,6 +15,25 @@ export async function POST(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // 使用量チェック
+  let orgId: string | null = null;
+  try {
+    const org = await getOrCreateOrganization(user.id, user.email!);
+    orgId = org.id;
+    const usageCheck = await canSendDocument(org.id);
+    if (!usageCheck.allowed) {
+      return NextResponse.json({
+        error: `今月の送信上限（${usageCheck.limit}件）に達しています。プランをアップグレードしてください。`,
+        code: "USAGE_LIMIT_REACHED",
+        current: usageCheck.current,
+        limit: usageCheck.limit,
+      }, { status: 403 });
+    }
+  } catch (err) {
+    console.error("[Send API] Usage check failed:", err);
+    // Usage check failure should not block sending
+  }
 
   // 文書取得
   const { data: doc } = await supabase
@@ -73,6 +94,16 @@ export async function POST(
     .from("documents")
     .update({ status: "sent", updated_at: new Date().toISOString() })
     .eq("id", id);
+
+  // 使用量カウンターをインクリメント
+  if (orgId) {
+    try {
+      const admin = createAdminClient();
+      await admin.rpc("increment_usage", { org_id: orgId, field: "documents_sent" });
+    } catch (err) {
+      console.error("[Send API] Usage increment failed:", err);
+    }
+  }
 
   const successCount = results.filter((r) => r.success).length;
   const failedResults = results.filter((r) => !r.success);

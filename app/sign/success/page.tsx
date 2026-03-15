@@ -13,8 +13,8 @@ function SuccessContent() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">U</div>
-            <span className="text-xl font-bold text-gray-800">UNSER Sign</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center text-white font-bold text-lg shadow-lg">M</div>
+            <span className="text-xl font-bold text-gray-800">MUSUBI <span className="font-normal text-base text-gray-500">sign</span></span>
           </div>
         </div>
 
@@ -76,7 +76,7 @@ function SuccessContent() {
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="1.5" width="20" height="20" className="w-5 h-5">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-              <span className="text-xs font-medium text-gray-500">UNSER Sign による電子署名で保護されています</span>
+              <span className="text-xs font-medium text-gray-500">MUSUBI sign による電子署名で保護されています</span>
             </div>
           </div>
         </div>

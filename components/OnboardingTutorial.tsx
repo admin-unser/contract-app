@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-const STORAGE_KEY = "unser-sign-onboarding-completed";
+const STORAGE_KEY = "musubi-sign-onboarding-completed";
 
 interface Step {
   title: string;
@@ -102,10 +102,10 @@ export function OnboardingTutorial() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-                <span className="font-bold text-lg">U</span>
+                <span className="font-bold text-lg">M</span>
               </div>
               <div>
-                <h2 className="text-lg font-bold">UNSER Sign の使い方</h2>
+                <h2 className="text-lg font-bold">MUSUBI sign の使い方</h2>
                 <p className="text-blue-100 text-sm">かんたん4ステップで署名依頼</p>
               </div>
             </div>
