@@ -3,12 +3,18 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendSigningRequest } from "@/lib/email";
 import { getOrCreateOrganization, canSendDocument } from "@/lib/organization";
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from "@/lib/rate-limit";
 
 // 署名依頼メールを一括送信
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getClientIp(request);
+  const rl = rateLimit(`send:${ip}`, RATE_LIMITS.send);
+  const blocked = rateLimitResponse(rl);
+  if (blocked) return blocked;
+
   const { id } = await params;
   const supabase = await createClient();
   const {

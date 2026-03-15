@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS plans (
 INSERT INTO plans (id, name, price_monthly, max_documents_per_month, max_users, max_templates, features, sort_order) VALUES
   ('free',       'Free',       0,     5,    1,    3,    '{"api": false, "audit_log": false, "ai_review": false, "custom_email": false}', 1),
   ('starter',    'Starter',    2980,  30,   3,    20,   '{"api": false, "audit_log": true, "ai_review": true, "custom_email": true}', 2),
-  ('business',   'Business',   9800,  null, null, null, '{"api": true, "audit_log": true, "ai_review": true, "custom_email": true, "webhook": true, "sso": false}', 3),
+  ('business',   'Business',   5000,  null, null, null, '{"api": true, "audit_log": true, "ai_review": true, "custom_email": true, "webhook": true, "sso": false}', 3),
   ('enterprise', 'Enterprise', 0,     null, null, null, '{"api": true, "audit_log": true, "ai_review": true, "custom_email": true, "webhook": true, "sso": true}', 4)
 ON CONFLICT (id) DO NOTHING;
 

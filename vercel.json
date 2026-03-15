@@ -6,5 +6,7 @@
       "path": "/api/cron/contract-alerts",
       "schedule": "0 9 * * *"
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }

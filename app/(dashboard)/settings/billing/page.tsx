@@ -57,7 +57,7 @@ const PLAN_CARDS: {
   {
     id: "business",
     name: "Business",
-    price: "9,800",
+    price: "5,000",
     priceNote: "円 / 月",
     features: [
       "送信無制限",

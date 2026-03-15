@@ -3,15 +3,27 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
 import { getOrCreateOrganization } from "@/lib/organization";
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from "@/lib/rate-limit";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const rl = rateLimit(`billing:${ip}`, RATE_LIMITS.billing);
+  const blocked = rateLimitResponse(rl);
+  if (blocked) return blocked;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { planId } = await request.json();
+  let body: { planId?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+  const { planId } = body;
   if (!planId || !["starter", "business"].includes(planId)) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }

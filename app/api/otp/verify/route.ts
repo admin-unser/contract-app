@@ -1,8 +1,14 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAuditLog, extractRequestInfo } from "@/lib/audit";
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const rl = rateLimit(`otp-verify:${ip}`, RATE_LIMITS.otp);
+  const blocked = rateLimitResponse(rl);
+  if (blocked) return blocked;
+
   const { token, code } = (await request.json()) as { token: string; code: string };
   if (!token || !code) {
     return NextResponse.json({ error: "tokenとcodeが必要です。" }, { status: 400 });

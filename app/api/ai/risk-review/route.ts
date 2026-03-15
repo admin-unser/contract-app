@@ -3,13 +3,26 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getOrCreateOrganization, getSubscriptionWithPlan } from "@/lib/organization";
 import { reviewContract } from "@/lib/ai-review";
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
+  // Rate limit: 5 req/min for AI (expensive)
+  const ip = getClientIp(request);
+  const rl = rateLimit(`ai:${ip}`, RATE_LIMITS.ai);
+  const blocked = rateLimitResponse(rl);
+  if (blocked) return blocked;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { documentId, text } = await request.json();
+  let body: { documentId?: string; text?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+  const { documentId, text } = body;
 
   // Check plan allows AI review
   try {

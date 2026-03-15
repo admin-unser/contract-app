@@ -3,18 +3,32 @@ import { sendCompletionNotification } from "@/lib/email";
 import { computeChainHash } from "@/lib/hash";
 import { recordAuditLog, extractRequestInfo } from "@/lib/audit";
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from "@/lib/rate-limit";
+import { isValidUUID, logSecurityEvent } from "@/lib/security";
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  // Rate limit signing requests
+  const ip = getClientIp(request);
+  const rl = rateLimit(`sign:${ip}`, RATE_LIMITS.send);
+  const blocked = rateLimitResponse(rl);
+  if (blocked) return blocked;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
   const { documentId, signerId, signature, stampData, token, fieldValues } = body as {
     documentId: string;
     signerId?: string;
     token?: string;
     signature: { type: string; text?: string; dataUrl?: string };
     stampData?: { type: string; text?: string; dataUrl?: string };
-    fieldValues?: Record<string, string>; // field_id -> value
+    fieldValues?: Record<string, string>;
   };
-  if (!documentId) {
+  if (!documentId || !isValidUUID(documentId)) {
+    logSecurityEvent("invalid_document_id", { documentId }, request);
     return NextResponse.json(
       { error: "documentId が必要です。" },
       { status: 400 }
