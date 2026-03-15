@@ -4,13 +4,41 @@ import { NextResponse } from "next/server";
 import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 
-// Google Fonts CDN for Noto Sans JP (supports Japanese)
-const NOTO_SANS_JP_URL =
-  "https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.woff2";
+// Google Fonts CSS2 API: use non-woff2 user-agent to get TTF URL
+// pdf-lib only supports OTF/TTF (not WOFF2)
+const GOOGLE_FONTS_CSS_URL =
+  "https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap";
+
+let fontCache: ArrayBuffer | null = null;
 
 async function loadJapaneseFont(): Promise<ArrayBuffer> {
-  const res = await fetch(NOTO_SANS_JP_URL);
-  return res.arrayBuffer();
+  if (fontCache) return fontCache;
+  // Request with old user-agent to get TTF URLs instead of WOFF2
+  const cssRes = await fetch(GOOGLE_FONTS_CSS_URL, {
+    headers: {
+      "User-Agent": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)",
+    },
+  });
+  if (!cssRes.ok) {
+    throw new Error(`Google Fonts CSS fetch failed: ${cssRes.status}`);
+  }
+  const cssText = await cssRes.text();
+  // Extract TTF URL from CSS
+  const urlMatch = cssText.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+\.ttf)\)/);
+  if (!urlMatch) {
+    throw new Error("Could not extract TTF URL from Google Fonts CSS");
+  }
+  const ttfUrl = urlMatch[1];
+  const fontRes = await fetch(ttfUrl);
+  if (!fontRes.ok) {
+    throw new Error(`Font TTF fetch failed: ${fontRes.status}`);
+  }
+  const buf = await fontRes.arrayBuffer();
+  if (buf.byteLength < 10000) {
+    throw new Error(`Font too small (${buf.byteLength} bytes)`);
+  }
+  fontCache = buf;
+  return buf;
 }
 
 // Embed a PNG dataUrl image into a field area on a PDF page
@@ -107,13 +135,13 @@ export async function GET(
   // Register fontkit for custom font embedding
   pdfDoc.registerFontkit(fontkit);
 
-  // Load Japanese font
+  // Load Japanese font (TTF format required by pdf-lib)
   let jpFont;
   try {
     const fontBytes = await loadJapaneseFont();
     jpFont = await pdfDoc.embedFont(fontBytes, { subset: true });
-  } catch {
-    // Fallback: if font loading fails, we'll skip text rendering for JP
+  } catch (fontErr) {
+    console.error("[download] Japanese font load failed:", fontErr);
   }
 
   const pages = pdfDoc.getPages();
@@ -232,8 +260,8 @@ export async function GET(
           await embedImageInField(pdfDoc, lastPage, stampData.dataUrl, 200, y - 60, 60, 60);
         }
       }
-    } catch {
-      // skip parse errors
+    } catch (renderErr) {
+      console.error(`[download] Error rendering signer ${signer.id}:`, renderErr);
     }
   }
 
