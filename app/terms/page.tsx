@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
+import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "利用規約 | MUSUBI sign",
@@ -13,7 +13,7 @@ export default function TermsPage() {
       <header className="border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="MUSUBI sign" width={84} height={28} className="object-contain" style={{ height: 28, width: "auto" }} />
+            <Logo height={28} />
           </Link>
         </div>
       </header>

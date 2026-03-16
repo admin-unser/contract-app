@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { Logo } from "@/components/Logo";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -16,7 +16,7 @@ export default async function HomePage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <Image src="/logo.png" alt="MUSUBI sign" width={108} height={36} className="object-contain" style={{ height: 36, width: "auto" }} priority />
+            <Logo height={34} />
           </div>
           <div className="flex items-center gap-4">
             <a href="#pricing" className="text-sm text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">料金</a>
@@ -261,7 +261,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Image src="/logo.png" alt="MUSUBI sign" width={84} height={28} className="object-contain" style={{ height: 28, width: "auto" }} />
+                <Logo height={26} />
               </div>
               <p className="text-sm text-gray-400">契約を、結ぶ。</p>
             </div>
