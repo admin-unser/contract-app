@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Logo } from "@/components/Logo";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -36,11 +37,8 @@ function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo area */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">M</span>
-            </div>
-            <span className="text-2xl font-bold text-gray-800 tracking-tight">MUSUBI <span className="font-normal text-lg text-gray-500">sign</span></span>
+          <div className="flex items-center justify-center mb-3">
+            <Logo height={40} />
           </div>
           <p className="text-sm text-gray-500">契約を、結ぶ。</p>
         </div>

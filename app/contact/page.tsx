@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Logo } from "@/components/Logo";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", company: "", type: "general", message: "" });
@@ -22,10 +23,7 @@ export default function ContactPage() {
       <header className="border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
-            </div>
-            <span className="font-bold text-gray-800">MUSUBI sign</span>
+            <Logo height={28} />
           </Link>
         </div>
       </header>

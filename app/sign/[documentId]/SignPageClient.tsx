@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { SignatureField } from "@/lib/types";
 import { SignForm } from "./SignForm";
+import { Logo } from "@/components/Logo";
 
 interface SignPageClientProps {
   documentId: string;
@@ -49,11 +50,8 @@ export function SignPageClient({
         <div className="w-full max-w-lg">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                M
-              </div>
-              <span className="text-xl font-bold text-gray-800">MUSUBI <span className="font-normal text-base text-gray-500">sign</span></span>
+            <div className="inline-flex items-center">
+              <Logo height={36} />
             </div>
           </div>
 

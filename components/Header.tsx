@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
+import { Logo } from "./Logo";
 
 export function Header({ email, onMenuToggle }: { email: string; onMenuToggle?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,14 +36,8 @@ export function Header({ email, onMenuToggle }: { email: string; onMenuToggle?: 
             </svg>
           </button>
         )}
-        <Link href="/documents" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-            <span className="text-white font-bold text-sm">M</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold text-gray-800 leading-tight">MUSUBI <span className="font-normal text-sm text-gray-400">sign</span></span>
-            <span className="text-[10px] text-gray-400 leading-tight">電子契約プラットフォーム</span>
-          </div>
+        <Link href="/documents" className="flex items-center group">
+          <Logo height={32} />
         </Link>
       </div>
       <div className="flex items-center gap-3" ref={menuRef}>

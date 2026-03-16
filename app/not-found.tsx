@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
-      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center mb-6">
-        <span className="text-white font-bold text-2xl">M</span>
+      <div className="mb-6">
+        <Logo height={48} />
       </div>
       <h1 className="text-6xl font-extrabold text-gray-200 mb-2">404</h1>
       <h2 className="text-xl font-bold text-gray-900 mb-2">ページが見つかりません</h2>

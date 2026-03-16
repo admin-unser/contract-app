@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" fill="#1a2744">
+  <!-- Mizuhiki knot / musubi mark -->
+  <!-- Left loop -->
+  <path d="M38 32c-12-8-28-4-32 8s4 24 18 24c6 0 12-3 16-8" fill="none" stroke="#1a2744" stroke-width="7" stroke-linecap="round"/>
+  <!-- Right loop -->
+  <path d="M62 32c12-8 28-4 32 8s-4 24-18 24c-6 0-12-3-16-8" fill="none" stroke="#1a2744" stroke-width="7" stroke-linecap="round"/>
+  <!-- Center crossing -->
+  <path d="M38 32c8 12 16 12 24 0" fill="none" stroke="#1a2744" stroke-width="7" stroke-linecap="round"/>
+  <!-- Left tail -->
+  <path d="M6 60c-4 10 2 22 14 28" fill="none" stroke="#1a2744" stroke-width="6" stroke-linecap="round"/>
+  <!-- Right tail -->
+  <path d="M94 60c4 10-2 22-14 28" fill="none" stroke="#1a2744" stroke-width="6" stroke-linecap="round"/>
+</svg>

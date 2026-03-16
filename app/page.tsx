@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -14,11 +15,8 @@ export default async function HomePage() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center">
-              <span className="text-white font-bold text-lg">M</span>
-            </div>
-            <span className="text-xl font-bold text-gray-800 tracking-tight">MUSUBI <span className="font-normal text-base text-gray-500">sign</span></span>
+          <div className="flex items-center">
+            <Image src="/logo.png" alt="MUSUBI sign" width={108} height={36} className="object-contain" style={{ height: 36, width: "auto" }} priority />
           </div>
           <div className="flex items-center gap-4">
             <a href="#pricing" className="text-sm text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">料金</a>
@@ -263,10 +261,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-md bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">M</span>
-                </div>
-                <span className="font-bold text-gray-800">MUSUBI sign</span>
+                <Image src="/logo.png" alt="MUSUBI sign" width={84} height={28} className="object-contain" style={{ height: 28, width: "auto" }} />
               </div>
               <p className="text-sm text-gray-400">契約を、結ぶ。</p>
             </div>

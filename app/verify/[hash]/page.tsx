@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { Logo } from "@/components/Logo";
 
 interface VerificationResult {
   verified: boolean;
@@ -48,10 +49,7 @@ export default function VerifyPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
-            </div>
-            <span className="text-lg font-bold text-gray-800">MUSUBI <span className="font-normal text-sm text-gray-500">sign</span></span>
+            <Logo height={32} />
           </div>
           <p className="text-sm text-gray-500 mt-1">文書検証</p>
         </div>

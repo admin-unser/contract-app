@@ -8,6 +8,7 @@ import "react-pdf/dist/Page/TextLayer.css";
 import type { SignatureField, FieldType } from "@/lib/types";
 import { FIELD_TYPE_CONFIG } from "@/lib/types";
 import { SignatureGenerator } from "@/components/SignatureGenerator";
+import { Logo } from "@/components/Logo";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -282,12 +283,9 @@ export function SignForm({
         <div className="px-5 py-3 flex items-center justify-between">
           {/* Left: logo + title */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1a365d] to-[#312e81] flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-indigo-900/20">
-              M
-            </div>
-            <div className="flex flex-col">
+            <Logo height={28} />
+            <div className="flex flex-col ml-2">
               <span className="text-sm font-bold text-gray-900 truncate max-w-[180px] md:max-w-[280px] leading-tight">{documentTitle}</span>
-              <span className="text-[10px] text-gray-400 font-medium">MUSUBI sign</span>
             </div>
           </div>
 
